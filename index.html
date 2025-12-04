@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BossGuild Tracker</title>
+    <title>BossGuild</title>
     <meta name="theme-color" content="#FDFCF8">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -350,7 +350,9 @@
             padding: 1rem 1.5rem; border-radius: 12px; color: #44403C;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
             transform: translateX(120%); transition: 0.4s; z-index: 2000;
-            display: flex; align-items: center; gap: 1rem; font-weight: 500;
+            display: flex; align-items: flex-start; gap: 1rem; font-weight: 500;
+            white-space: pre-line;
+            max-width: 90vw; width: max-content;
         }
         .toast.show { transform: translateX(0); }
 
@@ -465,7 +467,7 @@
     <!-- Background Elements -->
     <div class="particles" id="particles"></div>
     <div id="toast" class="toast">
-        <i class="fas fa-info-circle text-stone-400"></i>
+        <i class="fas fa-info-circle text-stone-400 mt-1"></i>
         <span id="toast-msg">Notification</span>
     </div>
 
@@ -1594,12 +1596,12 @@
             playTone('pop');
         }
 
-        function showToast(msg, type = 'info') {
+        function showToast(msg, type = 'info', duration = 3000) {
             const t = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = msg;
             t.classList.add('show');
             playTone(type === 'success' ? 'success' : 'pop');
-            setTimeout(() => t.classList.remove('show'), 3000);
+            setTimeout(() => t.classList.remove('show'), duration);
         }
 
         function toggleSound() { 
@@ -1710,57 +1712,52 @@
                     const cvs = document.createElement('canvas');
                     const ctx = cvs.getContext('2d');
 
-                    // 1. Upscaling: Tesseract loves larger text
-                    // If image is small (< 1500px width), scale it up
+                    // 1. Aggressive Upscaling: Tesseract loves larger text
                     let width = img.width;
                     let height = img.height;
-                    const targetWidth = 2500; // Increased to 2500 for better Thai vowel detection
-                    if (width < targetWidth) {
-                        const scale = targetWidth / width;
-                        width = Math.round(width * scale);
-                        height = Math.round(height * scale);
-                    }
+                    
+                    // Scale so the smallest dimension is at least 2000px
+                    const minDim = 2000;
+                    const scale = Math.max(minDim / width, minDim / height, 1);
+                    
+                    width = Math.round(width * scale);
+                    height = Math.round(height * scale);
 
-                    cvs.width = width;
-                    cvs.height = height;
+                    // 2. Padding: Add white border to prevent edge clipping
+                    const padding = 40;
+                    cvs.width = width + (padding * 2);
+                    cvs.height = height + (padding * 2);
 
-                    // Draw with white background
+                    // Fill with white background first
                     ctx.fillStyle = "#FFFFFF";
-                    ctx.fillRect(0, 0, width, height);
-                    // Use high quality smoothing
+                    ctx.fillRect(0, 0, cvs.width, cvs.height);
+                    
+                    // Draw Image with High Quality Smoothing
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
-                    ctx.drawImage(img, 0, 0, width, height);
+                    ctx.drawImage(img, padding, padding, width, height);
 
-                    const idata = ctx.getImageData(0, 0, width, height);
+                    const idata = ctx.getImageData(0, 0, cvs.width, cvs.height);
                     const d = idata.data;
                     const len = d.length;
 
-                    // 2. Grayscale & Analysis
+                    // 3. Grayscale & Stats Calculation
                     let totalLuminance = 0;
                     const grayArr = new Uint8Array(len / 4);
 
                     for (let i = 0; i < len; i += 4) {
-                        // Weighted RGB for human perception of luminance
                         const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
                         grayArr[i / 4] = g;
                         totalLuminance += g;
                     }
-
-                    // 3. Auto-Invert Check
-                    // If average luminance is low (< 128), it's likely a dark theme (white text on dark).
-                    // Tesseract prefers black text on white background.
+                    
                     const avgLum = totalLuminance / (len / 4);
                     const isDarkTheme = avgLum < 128;
 
-                    // 4. Binarization (Otsu's Method)
-                    // Calculate Histogram
+                    // 4. Calculate Otsu Threshold (from grayscale data)
                     const histogram = new Array(256).fill(0);
-                    for (let i = 0; i < grayArr.length; i++) {
-                        histogram[grayArr[i]]++;
-                    }
+                    for (let i = 0; i < grayArr.length; i++) histogram[grayArr[i]]++;
 
-                    // Calculate Otsu Threshold
                     let sum = 0;
                     for (let i = 0; i < 256; i++) sum += i * histogram[i];
 
@@ -1776,11 +1773,9 @@
                         if (wB === 0) continue;
                         wF = totalPixels - wB;
                         if (wF === 0) break;
-
                         sumB += t * histogram[t];
                         const mB = sumB / wB;
                         const mF = (sum - sumB) / wF;
-
                         const varBetween = wB * wF * (mB - mF) * (mB - mF);
                         if (varBetween > maxVar) {
                             maxVar = varBetween;
@@ -1788,30 +1783,27 @@
                         }
                     }
 
-                    // Apply Threshold & Invert if necessary
-                    // We want the text to be BLACK (0) and background WHITE (255)
+                    // 5. Enhanced Binarization with Contrast Boost
+                    // Logic: We want FINAL output to be Black Text (0) on White BG (255)
                     for (let i = 0; i < len; i += 4) {
-                        const g = grayArr[i / 4];
+                        // Apply slight contrast stretch to the grayscale value
+                        let g = grayArr[i / 4];
+                        
+                        // Apply threshold logic
                         let val;
-
                         if (isDarkTheme) {
-                            // Dark Theme: Background is Dark (Low G), Text is Light (High G)
-                            // We want Text (High G) -> Black (0)
-                            // We want BG (Low G) -> White (255)
-                            // So if G > Threshold (Text) -> 0, Else -> 255
+                            // Dark Mode Source: Text is Light (High G), BG is Dark (Low G)
+                            // We want Text -> Black (0), BG -> White (255)
                             val = g > threshold ? 0 : 255;
                         } else {
-                            // Light Theme: Background is Light (High G), Text is Dark (Low G)
-                            // We want Text (Low G) -> Black (0)
-                            // We want BG (High G) -> White (255)
-                            // So if G < Threshold (Text) -> 0, Else -> 255
+                            // Light Mode Source: Text is Dark (Low G), BG is Light (High G)
+                            // We want Text -> Black (0), BG -> White (255)
                             val = g < threshold ? 0 : 255;
                         }
 
                         d[i] = val;
                         d[i + 1] = val;
                         d[i + 2] = val;
-                        // Alpha remains 255 (from canvas init) or original
                     }
 
                     ctx.putImageData(idata, 0, 0);
@@ -1852,7 +1844,7 @@
             // Reset UI
             progressBar.style.width = '0%';
             progressPercent.innerText = '0%';
-            statusText.innerText = "📷 Preprocessing Image...";
+            statusText.innerText = "📷 Enhancing Image...";
             modal.classList.add('active');
 
             try {
@@ -1876,7 +1868,7 @@
                             const p = 20 + (m.progress * 70); 
                             progressBar.style.width = `${p}%`;
                             progressPercent.innerText = `${Math.round(p)}%`;
-                            statusText.innerText = "🧠 Recognizing Text...";
+                            statusText.innerText = "🧠 Recognizing Thai...";
                         } else if (m.status === 'loading tesseract core') {
                              statusText.innerText = "⬇️ Loading Core...";
                         } else if (m.status === 'loading language traineddata') {
@@ -1895,70 +1887,102 @@
                 await new Promise(r => setTimeout(r, 300)); // Short UX pause to show 95%
 
                 let count = 0;
+                let updates = []; // Track updates for summary toast
                 const lines = text.split('\n');
 
-                lines.forEach(line => {
+                // Using standard for loop to access subsequent lines for context
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
                     // Enhanced Matching: Normalize by stripping ALL whitespaces
-                    // OCR often adds spaces in Thai: "ส ม ชา ย" -> "สมชาย"
                     const lineNormalized = line.replace(/\s+/g, '').toLowerCase();
 
                     STATE.members.forEach((m, mIdx) => {
                         const nameNormalized = m.name.replace(/\s+/g, '').toLowerCase();
 
                         if (lineNormalized.includes(nameNormalized)) {
-                            // NEW PARSING LOGIC:
-                            // We need to support formats like: 5,827,181
-                            
-                            const scores = [];
+                            // Context: Current line + Next line
+                            const currentLine = lines[i];
+                            const nextLine = (i + 1 < lines.length) ? lines[i + 1] : "";
+                            const contextText = currentLine + " " + nextLine;
 
-                            // 1. Regex for formatted numbers (1,234 or 1.234 or 1 234)
-                            // Looks for 1-3 digits followed by groups of 3 digits separated by [, . space]
-                            // The (?!\d) lookahead ensures we don't match the start of a longer sequence
-                            const bigNumRegex = /\d{1,3}(?:[,. ]\d{3})+(?!\d)/g;
-                            const bigMatches = line.match(bigNumRegex) || [];
-                            
-                            bigMatches.forEach(m => {
-                                const raw = m.replace(/[^\d]/g, '');
-                                const num = parseInt(raw);
-                                if (!isNaN(num) && num > 1000) scores.push(num);
-                            });
+                            // 1. Get Score (Max > 1000 from both lines)
+                            const allNumMatches = contextText.match(/[\d,.]+/g) || [];
+                            const candidates = allNumMatches.map(n => parseInt(n.replace(/[,.]/g, ''))).filter(n => !isNaN(n));
+                            const maxScore = candidates.length > 0 ? Math.max(...candidates.filter(n => n > 1000)) : 0;
 
-                            // 2. Fallback: Split by wide whitespace and check for simple integers
-                            // This covers cases where numbers aren't formatted or OCR removed separators
-                            const parts = line.split(/\s+/);
-                            parts.forEach(p => {
-                                // Remove trailing/leading punctuation
-                                const cleanP = p.replace(/^[,.]+|[,.]+$/g, '');
-                                // If it is a clean integer
-                                const raw = cleanP.replace(/[^\d]/g, '');
-                                if (raw.length > 0 && cleanP.match(/^\d+$/)) {
-                                     const num = parseInt(raw);
-                                     if (!isNaN(num) && num > 1000) scores.push(num);
+                            // 2. Get Count (Small number on next line)
+                            let countVal = null;
+                            const nextLineNumMatches = nextLine.match(/[\d,.]+/g) || [];
+                            // Filter strictly: integers between 1 and 50.
+                            const smallNums = nextLineNumMatches
+                                .map(n => parseInt(n.replace(/[,.]/g, '')))
+                                .filter(n => !isNaN(n) && n > 0 && n <= 50);
+
+                            if (smallNums.length > 0) {
+                                countVal = smallNums[0];
+                            }
+
+                            if (maxScore > 0) {
+                                let oldScore = isDestroyer ? STATE.members[mIdx].v2 : STATE.members[mIdx].d[bossIdx];
+                                let oldCount = isDestroyer ? 0 : STATE.members[mIdx].v[bossIdx];
+                                let scoreChanged = false;
+                                let countChanged = false;
+
+                                // Update Score
+                                if (maxScore !== oldScore) {
+                                    if (isDestroyer) STATE.members[mIdx].v2 = maxScore;
+                                    else STATE.members[mIdx].d[bossIdx] = maxScore;
+                                    scoreChanged = true;
                                 }
-                            });
 
-                            if (scores.length > 0) {
-                                // Assume score is the largest number found > 1000
-                                const maxScore = Math.max(...scores);
-
-                                if (isDestroyer) {
-                                    STATE.members[mIdx].v2 = maxScore;
-                                } else {
-                                    STATE.members[mIdx].d[bossIdx] = maxScore;
-                                    // Auto update count if 0
-                                    if (STATE.members[mIdx].v[bossIdx] === 0) STATE.members[mIdx].v[bossIdx] = 1;
+                                // Update Count (INDEPENDENT CHECK)
+                                if (!isDestroyer) {
+                                    if (countVal !== null) {
+                                        // If we found a count in image, FORCE update if different
+                                        if (countVal !== oldCount) {
+                                            STATE.members[mIdx].v[bossIdx] = countVal;
+                                            countChanged = true;
+                                        }
+                                    } else if (STATE.members[mIdx].v[bossIdx] === 0) {
+                                        // Fallback: Smart Increment if no count found and starting from 0
+                                        STATE.members[mIdx].v[bossIdx] = 1;
+                                        countChanged = true;
+                                    }
                                 }
-                                count++;
+
+                                if (scoreChanged || countChanged) {
+                                    let details = [];
+                                    if(scoreChanged) details.push(`Dmg: ${oldScore.toLocaleString()} -> ${maxScore.toLocaleString()}`);
+                                    if(countChanged) details.push(`Cnt: ${oldCount} -> ${STATE.members[mIdx].v[bossIdx]}`);
+
+                                    updates.push({
+                                        name: m.name,
+                                        details: details.join(', ')
+                                    });
+                                    count++;
+                                }
                             }
                         }
                     });
-                });
+                }
 
                 modal.classList.remove('active');
                 saveState('ocr');
                 render();
-                showToast(`OCR Complete: Updated ${count} records`, "success");
-                playTone('success');
+                
+                // Detailed Summary Toast
+                if (updates.length > 0) {
+                    let msg = `OCR Complete (${updates.length} updated)`;
+                    updates.slice(0, 5).forEach(u => {
+                        msg += `\n• ${u.name}: ${u.details}`;
+                    });
+                    if (updates.length > 5) {
+                        msg += `\n...and ${updates.length - 5} more`;
+                    }
+                    showToast(msg, "success", 6000);
+                } else {
+                    showToast("OCR Complete: No new data found.", "info");
+                }
 
             } catch (e) {
                 console.error(e);
@@ -2287,5 +2311,3 @@
 </body>
 
 </html>
-
-
