@@ -18,36 +18,41 @@
             theme: {
                 extend: {
                     colors: {
-                        stone: {
-                            50: '#fafaf9',
-                            100: '#f5f5f4',
-                            200: '#e7e5e4',
-                            300: '#d6d3d1',
-                            400: '#a8a29e',
-                            500: '#78716c',
-                            600: '#57534e',
-                            700: '#44403c',
-                            800: '#292524',
-                            900: '#1c1917',
+                        // Kanso Light Theme
+                        kanso: {
+                            bg: '#F9F8F6',
+                            surface: '#EFECE5',
+                            text: '#34302D',
+                            muted: '#898481',
+                            border: 'rgba(52, 48, 45, 0.08)',
                         },
-                        amber: {
-                            500: '#f59e0b',
-                            600: '#d97706',
-                            700: '#b45309',
+                        // Kanso Dark Theme
+                        kansoDark: {
+                            bg: '#0F0F0F',
+                            surface: '#1A1A1A',
+                            text: '#EDEDED',
+                            muted: '#888888',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                        },
+                        // Clay/Terracotta Accent (replacing Amber)
+                        clay: {
+                            400: '#D98661',
+                            500: '#CC6E43',
+                            600: '#B85A32',
                         },
                         emerald: {
                             400: '#34d399',
                             500: '#10b981',
                             600: '#059669',
                         },
-                        paper: '#FDFCF8',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Prompt', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
                     },
                     boxShadow: {
-                        'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.05)',
+                        'soft': '0 20px 40px -12px rgba(60, 50, 40, 0.1)',
+                        'soft-dark': '0 20px 40px -12px rgba(0, 0, 0, 0.4)',
                     }
                 }
             }
@@ -55,7 +60,9 @@
     </script>
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Libraries -->
@@ -65,317 +72,905 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <!-- Tesseract.js (~2MB) lazy loaded when OCR is used -->
 
     <style>
-        /* Custom Overrides for Kanso Feel */
+        /* ====================================
+           KANSO THEME - Warm Cream & Deep Charcoal
+           ==================================== */
+
+        /* Design Tokens - World Class Consistency */
+        :root {
+            /* Spacing Scale (4-point grid) */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 20px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-10: 40px;
+
+            /* Border Radius Scale */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+            --radius-full: 9999px;
+
+            /* Typography Scale */
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+
+            /* Kanso Colors */
+            --kanso-bg: #F9F8F6;
+            --kanso-surface: #EFECE5;
+            --kanso-text: #34302D;
+            --kanso-muted: #898481;
+            --kanso-border: rgba(52, 48, 45, 0.08);
+            --clay-accent: #CC6E43;
+            --clay-light: #D98661;
+
+            /* Shadows */
+            --shadow-sm: 0 4px 12px -4px rgba(60, 50, 40, 0.08);
+            --shadow-md: 0 8px 24px -8px rgba(60, 50, 40, 0.1);
+            --shadow-lg: 0 20px 40px -12px rgba(60, 50, 40, 0.12);
+
+            /* Animation */
+            --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        [data-theme="dark"] {
+            --kanso-bg: #0F0F0F;
+            --kanso-surface: #1A1A1A;
+            --kanso-text: #EDEDED;
+            --kanso-muted: #888888;
+            --kanso-border: rgba(255, 255, 255, 0.08);
+            --shadow-sm: 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Global Body - Warm Eggshell Paper */
         body {
-            background-color: #FDFCF8;
-            color: #44403C;
-            font-family: 'Inter', sans-serif;
+            background-color: var(--kanso-bg);
+            color: var(--kanso-text);
+            font-family: 'Prompt', sans-serif;
             overflow-x: hidden;
-            transition: background-color 0.5s ease, color 0.5s ease;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            /* World Class Typography */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
-        /* Dark Mode overrides */
+        /* Noise Texture - Very Subtle */
+        .bg-noise {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.02;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Dark Mode - Deep Matte Charcoal */
         [data-theme="dark"] body {
-            background-color: #1C1917;
-            color: #E7E5E4;
+            background-color: #0F0F0F;
+            color: #EDEDED;
         }
 
-        /* Particles - Hidden for Kanso but kept for logic compatibility */
-        .particles { display: none; }
+        /* Scrollbar - Warm Tones */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #E7E5E4; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #D6D3D1; }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-        /* Glass Panel */
+        ::-webkit-scrollbar-thumb {
+            background: #D6CEBF;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #C4BAA8;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #333333;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #444444;
+        }
+
+        /* Premium Matte Panel - NO Glassmorphism */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(0, 0, 0, 0.03);
+            background: #EFECE5;
+            border: 1px solid rgba(52, 48, 45, 0.08);
             border-radius: 24px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 40px -12px rgba(60, 50, 40, 0.1);
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+
         [data-theme="dark"] .glass-panel {
-            background: rgba(41, 37, 36, 0.6);
-            border-color: rgba(255,255,255,0.05);
+            background: #1A1A1A;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
         }
 
-        /* Metric Cards */
+        /* Metric Cards - Warm Surface */
         .metric-card {
-            background: #FFFFFF;
-            border: 1px solid #F5F5F4;
+            background: #EFECE5;
+            border: 1px solid rgba(52, 48, 45, 0.06);
             border-radius: 20px;
             padding: 1.25rem;
-            display: flex; align-items: center; gap: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.01);
+            box-shadow: 0 8px 24px -8px rgba(60, 50, 40, 0.08);
         }
+
         [data-theme="dark"] .metric-card {
-            background: #292524;
-            border-color: #44403C;
+            background: #1A1A1A;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.3);
         }
 
         .metric-icon {
-            width: 48px; height: 48px;
+            width: 48px;
+            height: 48px;
             border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.1rem;
-            background: #FAFAF9; color: #78716C;
+            background: #F9F8F6;
+            color: #898481;
         }
-        [data-theme="dark"] .metric-icon { background: #44403C; color: #A8A29E; }
-        
-        /* Metric States */
-        .metric-used .metric-icon { background: #F5F5F4; color: #57534E; }
-        .metric-used .value { color: #57534E; }
-        .metric-remain .metric-icon { background: #FFF7ED; color: #C2410C; }
-        .metric-remain .value { color: #C2410C; }
-        [data-theme="dark"] .metric-remain .metric-icon { background: #431407; color: #FB923C; }
-        [data-theme="dark"] .metric-remain .value { color: #FB923C; }
 
-        /* Toolbar Buttons */
+        [data-theme="dark"] .metric-icon {
+            background: #252525;
+            color: #888888;
+        }
+
+        /* Metric States - Clay/Terracotta Accent */
+        .metric-used .metric-icon {
+            background: #F5F0E8;
+            color: #5C5650;
+        }
+
+        .metric-used .value {
+            color: #34302D;
+        }
+
+        .metric-remain .metric-icon {
+            background: #FFF0E6;
+            color: #CC6E43;
+        }
+
+        .metric-remain .value {
+            color: #CC6E43;
+        }
+
+        [data-theme="dark"] .metric-remain .metric-icon {
+            background: #2D1F18;
+            color: #D98661;
+        }
+
+        [data-theme="dark"] .metric-remain .value {
+            color: #D98661;
+        }
+
+        [data-theme="dark"] .metric-used .value {
+            color: #EDEDED;
+        }
+
+        /* Toolbar Buttons - Warm Tones */
         .tool-btn {
             background: transparent;
             border: 1px solid transparent;
-            color: #78716C;
+            color: #898481;
             padding: 0.5rem 1.25rem;
             border-radius: 9999px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; align-items: center; gap: 8px;
-            font-weight: 500; font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
             position: relative;
         }
-        
+
         /* Hover States */
-        .tool-btn:hover { 
-            background: #F5F5F4; 
-            color: #1C1917;
+        .tool-btn:hover {
+            background: #EFECE5;
+            color: #34302D;
             transform: translateY(-1px);
         }
-        [data-theme="dark"] .tool-btn:hover { 
-            background: rgba(255, 255, 255, 0.05); 
-            color: #F5F5F4; 
+
+        [data-theme="dark"] .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #EDEDED;
         }
 
         /* Active (Selected) State */
         .tool-btn.active {
-            background: #292524; 
-            color: #FFFFFF;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+            background: #34302D;
+            color: #F9F8F6;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
             transform: none;
         }
+
         .tool-btn.active:hover {
-            background: #1C1917;
+            background: #2A2623;
             transform: none;
         }
-        
-        [data-theme="dark"] .tool-btn.active { 
-            background: #FAFAF9; 
-            color: #1C1917;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+
+        [data-theme="dark"] .tool-btn.active {
+            background: #EDEDED;
+            color: #0F0F0F;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
+
         [data-theme="dark"] .tool-btn.active:hover {
-            background: #F5F5F4;
+            background: #FFFFFF;
         }
 
         /* Pressed Interaction (:active) */
         .tool-btn:active {
             transform: scale(0.96);
         }
-        
-        .btn-copy { background: #E7E5E4 !important; color: #44403C !important; }
 
-        /* Inputs */
+        .btn-copy {
+            background: #EFECE5 !important;
+            color: #34302D !important;
+        }
+
+        .btn-smart {
+            background: #E0E7FF !important;
+            color: #4338CA !important;
+        }
+
+        [data-theme="dark"] .btn-smart {
+            background: #312E81 !important;
+            color: #C7D2FE !important;
+        }
+
+        /* Inputs - Warm Brown Text */
         .input-minimal {
             background: transparent;
             border: 1px solid transparent;
-            border-bottom: 1px solid #E7E5E4;
-            color: #44403C;
-            font-family: 'Inter', sans-serif;
+            color: var(--kanso-text);
+            font-family: 'JetBrains Mono', monospace;
             font-weight: 500;
             width: 100%;
+            min-width: 50px;
             text-align: center;
-            padding: 6px;
-            border-radius: 4px;
-            transition: 0.2s;
-            font-size: 1rem;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-md);
+            transition: all 0.2s var(--ease-out);
+            font-size: var(--text-sm);
         }
-        [data-theme="dark"] .input-minimal { color: #E7E5E4; border-color: #44403C; }
+
+        [data-theme="dark"] .input-minimal {
+            color: #EDEDED;
+            border-color: transparent;
+        }
+
         .input-minimal:focus {
             background: #FFFFFF;
-            border-color: #A8A29E;
-            outline: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-color: var(--clay-accent);
+            outline: 2px solid rgba(204, 110, 67, 0.15);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(204, 110, 67, 0.08);
+            animation: focusRing 0.2s var(--ease-out);
         }
-        [data-theme="dark"] .input-minimal:focus { background: #292524; }
-        
-        .input-damage { font-variant-numeric: tabular-nums; text-align: right; padding-right: 8px; }
 
-        /* Table */
+        @keyframes focusRing {
+            from {
+                box-shadow: 0 0 0 0 rgba(204, 110, 67, 0.3);
+            }
+
+            to {
+                box-shadow: 0 0 0 4px rgba(204, 110, 67, 0.08);
+            }
+        }
+
+        [data-theme="dark"] .input-minimal:focus {
+            background: #252525;
+            border-color: var(--clay-light);
+            outline: 2px solid rgba(217, 134, 97, 0.15);
+            box-shadow: 0 0 0 4px rgba(217, 134, 97, 0.08);
+        }
+
+        .input-damage {
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+            padding-right: 8px;
+            font-size: 0.95rem;
+            min-width: 80px;
+        }
+
+        /* Monospace Number Font */
+        .font-serif-num,
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.95rem;
+        }
+
+        /* --- ORGANIC UI TABLE UPDATE --- */
         .table-wrapper {
-            background: #FFFFFF;
-            border-radius: 24px;
-            border: 1px solid rgba(0,0,0,0.03);
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.03);
-            overflow: hidden;
+            background: transparent;
+            /* Remove container bg */
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            overflow: visible;
+            /* Allow shadows to spill */
             position: relative;
         }
-        [data-theme="dark"] .table-wrapper { background: #1C1917; border-color: #292524; }
 
-        table { width: 100%; border-collapse: collapse; }
-        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 6px;
+            /* Tighter gap between rows */
+        }
+
         thead th {
             padding: 1rem;
-            color: #A8A29E;
+            color: #898481;
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             font-weight: 600;
             text-align: center;
-            border-bottom: 1px solid #F5F5F4;
-            background: #FDFCF8;
-            position: sticky; /* Sticky Header */
+            border-bottom: none;
+            background: transparent;
+            position: sticky;
             top: 0;
+            z-index: 30;
+        }
+
+        [data-theme="dark"] thead th {
+            color: #888888;
+        }
+
+        /* Floating Card Rows - Warm White */
+        tbody tr {
+            background: #FFFFFF;
+            box-shadow: 0 4px 12px -4px rgba(60, 50, 40, 0.08);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        [data-theme="dark"] tbody tr {
+            background: #1F1F1F;
+            border: 1px solid #2A2A2A;
+        }
+
+        tbody tr:hover {
+            transform: translateY(-2px) scale-[1.005];
+            box-shadow: 0 16px 32px -8px rgba(60, 50, 40, 0.12);
+            z-index: 10;
+            position: relative;
+        }
+
+        [data-theme="dark"] tbody tr:hover {
+            box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Border Radius for Capsule Effect */
+        td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            padding-left: 1rem;
+        }
+
+        td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            padding-right: 1rem;
+        }
+
+        td {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .member-name {
+            font-weight: 500;
+            color: #34302D;
+            cursor: pointer;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 100px;
+            max-width: 160px;
+        }
+
+        [data-theme="dark"] .member-name {
+            color: #EDEDED;
+        }
+
+        /* --- STICKY COLUMNS FOR MOBILE UX --- */
+        /* Column 1: Drag handle - Fixed width */
+        th:nth-child(1),
+        td:nth-child(1) {
+            position: sticky;
+            left: 0;
+            z-index: 21;
+            background-color: inherit;
+            min-width: 32px;
+            max-width: 32px;
+        }
+
+        /* Column 2: Member name - Wider sticky */
+        th:nth-child(2),
+        td:nth-child(2) {
+            position: sticky;
+            left: 32px;
             z-index: 20;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-        [data-theme="dark"] thead th { background: #292524; border-color: #44403C; }
-        
-        tbody tr { 
-            transition: background-color 0.15s ease; 
-            border-bottom: 1px solid #FAFAF9;
-            border-left: 3px solid transparent; /* Placeholder for status border */
-        }
-        [data-theme="dark"] tbody tr { border-color: #292524; }
-        tbody tr:hover { background: #FAFAF9; }
-        [data-theme="dark"] tbody tr:hover { background: #292524; }
-
-        td { padding: 1rem 0.5rem; text-align: center; vertical-align: middle; }
-        .member-name { font-weight: 500; color: #292524; cursor: pointer; }
-        [data-theme="dark"] .member-name { color: #E7E5E4; }
-        
-        /* Status Colors - Elegant Gradient */
-        tr.status-risk { 
-            background: linear-gradient(to right, rgba(254, 202, 202, 0.4), transparent);
-            border-left-color: #EF4444;
-        }
-        tr.status-god { 
-            background: linear-gradient(to right, rgba(254, 243, 199, 0.4), transparent);
-            border-left-color: #EAB308;
-        }
-        [data-theme="dark"] tr.status-risk { 
-            background: linear-gradient(to right, rgba(239, 68, 68, 0.15), transparent);
-            border-left-color: #EF4444;
-        }
-        [data-theme="dark"] tr.status-god { 
-            background: linear-gradient(to right, rgba(234, 179, 8, 0.15), transparent);
-            border-left-color: #EAB308;
+            background-color: inherit;
+            border-right: 1px solid var(--kanso-border);
+            min-width: 120px;
+            max-width: 160px;
         }
 
-        .fill-able { cursor: pointer; padding: 2px 8px; border-radius: 6px; transition: 0.2s; }
-        .fill-able:hover { background: #F5F5F4; }
-        [data-theme="dark"] .fill-able:hover { background: #44403C; }
+        /* Shadow indicator when scrolled */
+        td:nth-child(2)::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.04), transparent);
+            pointer-events: none;
+        }
+
+        [data-theme="dark"] th:nth-child(2),
+        [data-theme="dark"] td:nth-child(2) {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="dark"] td:nth-child(2)::after {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.15), transparent);
+        }
+
+        /* Tier Badges - Distinct Colors */
+        .tier-badge {
+            font-size: var(--text-xs);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            margin-right: var(--space-2);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: inline-block;
+            vertical-align: middle;
+            transition: transform 0.2s var(--ease-out);
+        }
+
+        .tier-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .tier-s {
+            background: #FEF3C7;
+            color: #B45309;
+            border: 1px solid #F59E0B;
+        }
+
+        .tier-a {
+            background: #EDE9FE;
+            color: #6D28D9;
+            border: 1px solid #A78BFA;
+        }
+
+        .tier-b {
+            background: #D1FAE5;
+            color: #047857;
+            border: 1px solid #34D399;
+        }
+
+        .tier-c {
+            background: #DBEAFE;
+            color: #1D4ED8;
+            border: 1px solid #60A5FA;
+        }
+
+        .tier-d {
+            background: #FEE2E2;
+            color: #B91C1C;
+            border: 1px solid #F87171;
+        }
+
+        .tier-e {
+            background: #F3F4F6;
+            color: #6B7280;
+            border: 1px solid #D1D5DB;
+        }
+
+        [data-theme="dark"] .tier-s {
+            background: #78350F;
+            color: #FCD34D;
+            border-color: #B45309;
+        }
+
+        [data-theme="dark"] .tier-a {
+            background: #4C1D95;
+            color: #C4B5FD;
+            border-color: #6D28D9;
+        }
+
+        [data-theme="dark"] .tier-b {
+            background: #064E3B;
+            color: #6EE7B7;
+            border-color: #059669;
+        }
+
+        [data-theme="dark"] .tier-c {
+            background: #1E3A8A;
+            color: #93C5FD;
+            border-color: #2563EB;
+        }
+
+        [data-theme="dark"] .tier-d {
+            background: #7F1D1D;
+            color: #FCA5A5;
+            border-color: #DC2626;
+        }
+
+        [data-theme="dark"] .tier-e {
+            background: #374151;
+            color: #9CA3AF;
+            border-color: #6B7280;
+        }
+
+        /* Status Colors - Apply to sticky cells too */
+        tr.status-risk {
+            background-color: #FEF2F2 !important;
+        }
+
+        tr.status-risk td:nth-child(1),
+        tr.status-risk td:nth-child(2) {
+            background-color: #FEF2F2 !important;
+        }
+
+        tr.status-god {
+            background-color: #FFFBEB !important;
+        }
+
+        tr.status-god td:nth-child(1),
+        tr.status-god td:nth-child(2) {
+            background-color: #FFFBEB !important;
+        }
+
+        [data-theme="dark"] tr.status-risk,
+        [data-theme="dark"] tr.status-risk td:nth-child(1),
+        [data-theme="dark"] tr.status-risk td:nth-child(2) {
+            background-color: #451a03 !important;
+        }
+
+        [data-theme="dark"] tr.status-god,
+        [data-theme="dark"] tr.status-god td:nth-child(1),
+        [data-theme="dark"] tr.status-god td:nth-child(2) {
+            background-color: #422006 !important;
+        }
+
+        .fill-able {
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .fill-able:hover {
+            background: #F5F5F4;
+        }
+
+        [data-theme="dark"] .fill-able:hover {
+            background: #44403C;
+        }
 
         .dead-toggle {
-            font-size: 0.6rem; padding: 2px 8px; border-radius: 99px;
-            cursor: pointer; background: #F5F5F4; color: #A8A29E;
-            margin-top: 4px; display: inline-block; font-weight: 600;
+            font-size: 0.6rem;
+            padding: 2px 8px;
+            border-radius: 99px;
+            cursor: pointer;
+            background: #F5F5F4;
+            color: #A8A29E;
+            margin-top: 4px;
+            display: inline-block;
+            font-weight: 600;
         }
-        .dead-toggle.is-dead { background: #FEE2E2; color: #EF4444; }
 
-        .cell-dead { opacity: 0.3; pointer-events: none; background: #FAFAF9; }
-        [data-theme="dark"] .cell-dead { background: #000; }
+        .dead-toggle.is-dead {
+            background: #FEE2E2;
+            color: #EF4444;
+        }
+
+        .cell-dead {
+            opacity: 0.3;
+            pointer-events: none;
+        }
 
         /* HP Panel */
-        .hp-panel { display: none; padding: 1.5rem; animation: fadeIn 0.5s ease; }
-        .hp-panel.active { display: block; }
-        .hp-card {
-            background: #FFFFFF; padding: 16px; border-radius: 16px;
-            border: 1px solid #F5F5F4;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        .hp-panel {
+            display: none;
+            padding: 1.5rem;
+            animation: fadeIn 0.5s ease;
         }
-        [data-theme="dark"] .hp-card { background: #292524; border-color: #44403C; }
-        .hp-track { height: 8px; background: #F5F5F4; border-radius: 99px; overflow: hidden; margin-top: 10px; position: relative; }
-        [data-theme="dark"] .hp-track { background: #44403C; }
-        .hp-fill { height: 100%; background: #DFA8A8; transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        .hp-overlay-text { font-size: 0.65rem; color: #78716C; margin-top: 4px; display: block; text-align: right; }
+
+        .hp-panel.active {
+            display: block;
+        }
+
+        .hp-card {
+            background: #FFFFFF;
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #F5F5F4;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="dark"] .hp-card {
+            background: #292524;
+            border-color: #44403C;
+        }
+
+        .hp-track {
+            height: 8px;
+            background: #F5F5F4;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        [data-theme="dark"] .hp-track {
+            background: #44403C;
+        }
+
+        .hp-fill {
+            height: 100%;
+            background: #DFA8A8;
+            transition: width 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .hp-overlay-text {
+            font-size: 0.65rem;
+            color: #78716C;
+            margin-top: 4px;
+            display: block;
+            text-align: right;
+        }
 
         /* Damage Helper */
         .damage-helper {
-            position: absolute; display: none; background: #FFFFFF;
-            padding: 8px; border-radius: 16px; z-index: 1000;
+            position: absolute;
+            display: none;
+            background: #FFFFFF;
+            padding: 8px;
+            border-radius: 16px;
+            z-index: 1000;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            border: 1px solid #F5F5F4; flex-direction: column; gap: 6px; animation: popIn 0.2s;
+            border: 1px solid #F5F5F4;
+            flex-direction: column;
+            gap: 6px;
+            animation: popIn 0.2s;
         }
-        [data-theme="dark"] .damage-helper { background: #292524; border-color: #44403C; }
-        .damage-helper.active { display: flex; }
+
+        [data-theme="dark"] .damage-helper {
+            background: #292524;
+            border-color: #44403C;
+        }
+
+        .damage-helper.active {
+            display: flex;
+        }
+
         .helper-btn {
-            font-size: 0.75rem; padding: 6px 12px; background: #F5F5F4; color: #57534E;
-            border: none; border-radius: 8px; cursor: pointer; transition: 0.2s; font-weight: 600;
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            background: #F5F5F4;
+            color: #57534E;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
         }
-        .helper-btn:hover { background: #E7E5E4; }
+
+        .helper-btn:hover {
+            background: #E7E5E4;
+        }
 
         /* Modals */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(253, 252, 248, 0.8);
-            backdrop-filter: blur(8px); z-index: 1000;
-            display: none; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s;
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        [data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.8); }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        
+
+        [data-theme="dark"] .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
         .modal {
-            background: #FFFFFF; border: 1px solid #F5F5F4; color: #44403C;
-            padding: 2.5rem; border-radius: 32px; width: 90%; max-width: 500px;
+            background: #FFFFFF;
+            border: 1px solid #F5F5F4;
+            color: #44403C;
+            padding: 2.5rem;
+            border-radius: 32px;
+            width: 90%;
+            max-width: 500px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-            transform: translateY(20px); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px);
+            transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        [data-theme="dark"] .modal { background: #1C1917; border-color: #292524; color: #E7E5E4; }
-        .modal-overlay.active .modal { transform: translateY(0); }
+
+        [data-theme="dark"] .modal {
+            background: #1C1917;
+            border-color: #292524;
+            color: #E7E5E4;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
 
         /* Toast */
         .toast {
-            position: fixed; bottom: 30px; right: 30px;
-            background: #FFFFFF; border: 1px solid #F5F5F4; border-left: 3px solid #44403C;
-            padding: 1rem 1.5rem; border-radius: 12px; color: #44403C;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #FFFFFF;
+            border: 1px solid #F5F5F4;
+            border-left: 3px solid #44403C;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: #44403C;
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
-            transform: translateX(120%); transition: 0.4s; z-index: 2000;
-            display: flex; align-items: flex-start; gap: 1rem; font-weight: 500;
+            transform: translateX(120%);
+            transition: 0.4s;
+            z-index: 2000;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            font-weight: 500;
             white-space: pre-line;
-            max-width: 90vw; width: max-content;
+            max-width: 90vw;
+            width: max-content;
         }
-        .toast.show { transform: translateX(0); }
+
+        .toast.show {
+            transform: translateX(0);
+        }
 
         /* Animations */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Export Options */
         .export-option {
-            background: #FFFFFF; border: 1px solid #F5F5F4; border-radius: 20px;
-            padding: 1.5rem 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
-            cursor: pointer; transition: all 0.3s;
+            background: #FFFFFF;
+            border: 1px solid #F5F5F4;
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        [data-theme="dark"] .export-option { background: #292524; border-color: #44403C; }
-        .export-option:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.06); }
+
+        [data-theme="dark"] .export-option {
+            background: #292524;
+            border-color: #44403C;
+        }
+
+        .export-option:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.06);
+        }
+
         .export-icon {
-            font-size: 1.5rem; color: #78716C; width: 56px; height: 56px;
-            border-radius: 50%; background: #FAFAF9;
-            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+            font-size: 1.5rem;
+            color: #78716C;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #FAFAF9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
         }
-        [data-theme="dark"] .export-icon { background: #44403C; color: #A8A29E; }
-        .export-option:hover .export-icon { background: #292524; color: white; }
-        [data-theme="dark"] .export-option:hover .export-icon { background: #FAFAF9; color: #1C1917; }
+
+        [data-theme="dark"] .export-icon {
+            background: #44403C;
+            color: #A8A29E;
+        }
+
+        .export-option:hover .export-icon {
+            background: #292524;
+            color: white;
+        }
+
+        [data-theme="dark"] .export-option:hover .export-icon {
+            background: #FAFAF9;
+            color: #1C1917;
+        }
 
         /* OCR Boss Modal Grid */
         .ocr-grid {
@@ -397,7 +992,12 @@
             align-items: center;
             gap: 10px;
         }
-        [data-theme="dark"] .ocr-option { background: #292524; border-color: #44403C; color: #E7E5E4; }
+
+        [data-theme="dark"] .ocr-option {
+            background: #292524;
+            border-color: #44403C;
+            color: #E7E5E4;
+        }
 
         .ocr-option:hover {
             background: #57534E;
@@ -406,77 +1006,290 @@
             border-color: #57534E;
         }
 
-        /* Auto Backup List */
-        .backup-list {
-            margin-top: 20px;
-            border-top: 1px solid #E7E5E4;
-            padding-top: 15px;
+        /* Archive/History List */
+        .history-list {
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        [data-theme="dark"] .backup-list { border-color: #44403C; }
 
-        .backup-item {
+        .history-item {
+            background: #FAFAF9;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 0.9rem;
-            color: #57534E;
-        }
-        [data-theme="dark"] .backup-item { color: #A8A29E; border-color: #44403C; }
-
-        .backup-restore-btn {
-            background: transparent;
-            border: 1px solid #A8A29E;
-            color: #A8A29E;
-            padding: 4px 10px;
-            border-radius: 8px;
-            cursor: pointer;
+            border: 1px solid transparent;
             transition: 0.2s;
-            font-size: 0.8rem;
         }
 
-        .backup-restore-btn:hover {
-            background: #A8A29E;
-            color: white;
+        [data-theme="dark"] .history-item {
+            background: #292524;
+            color: #E7E5E4;
+        }
+
+        .history-item:hover {
+            border-color: #A8A29E;
         }
 
         /* Misc */
-        .divider { width: 1px; height: 20px; background: #E7E5E4; margin: 0 0.5rem; }
-        .highlight { background: #FEF3C7; padding: 0 4px; border-radius: 4px; }
-        
-        #story-export {
-            position: fixed; top: -9999px; left: -9999px;
-            width: 1080px; height: 1920px;
-            background: #FDFCF8; color: #44403C;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        .divider {
+            width: 1px;
+            height: 20px;
+            background: #E7E5E4;
+            margin: 0 0.5rem;
         }
-        [data-theme="dark"] #story-export { background: #1C1917; color: #E7E5E4; }
-        
-        /* Mobile */
+
+        .highlight {
+            background: #FEF3C7;
+            padding: 0 4px;
+            border-radius: 4px;
+        }
+
+        #story-export {
+            position: fixed;
+            top: -9999px;
+            left: -9999px;
+            width: 1080px;
+            height: 1920px;
+            background: #FDFCF8;
+            color: #44403C;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        [data-theme="dark"] #story-export {
+            background: #1C1917;
+            color: #E7E5E4;
+        }
+
+        /* Command Palette */
+        #cmd-palette {
+            z-index: 5000;
+        }
+
+        .cmd-item {
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .cmd-item:hover,
+        .cmd-item.selected {
+            background-color: #f5f5f4;
+        }
+
+        [data-theme="dark"] .cmd-item:hover,
+        [data-theme="dark"] .cmd-item.selected {
+            background-color: #292524;
+        }
+
+        /* Mobile - Tablet */
         @media (max-width: 768px) {
-            .toolbar { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem; }
-            .tool-btn { white-space: nowrap; font-size: 0.8rem; padding: 0.5rem 1rem; }
-            .modal { width: 100%; border-radius: 32px 32px 0 0; position: fixed; bottom: 0; top: auto; transform: translateY(100%); margin: 0; max-width: none; }
-            .modal-overlay.active .modal { transform: translateY(0); }
+            .toolbar {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 0.5rem;
+            }
+
+            .tool-btn {
+                white-space: nowrap;
+                font-size: var(--text-sm);
+                padding: var(--space-2) var(--space-4);
+            }
+
+            .modal {
+                width: 100%;
+                border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+                position: fixed;
+                bottom: 0;
+                top: auto;
+                transform: translateY(100%);
+                margin: 0;
+                max-width: none;
+                animation: none;
+            }
+
+            .modal-overlay.active .modal {
+                transform: translateY(0);
+                animation: modalSlideUp 0.35s var(--ease-bounce);
+            }
+
+            @keyframes modalSlideUp {
+                from {
+                    transform: translateY(100%);
+                    opacity: 0.8;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            .metric-card {
+                padding: var(--space-4);
+            }
+
+            .member-name {
+                max-width: 140px;
+            }
+        }
+
+        /* Mobile - Small */
+        @media (max-width: 640px) {
+            .metric-card {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-2);
+            }
+
+            .metric-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            thead th {
+                padding: var(--space-2);
+                font-size: 0.65rem;
+            }
+
+            td {
+                padding: var(--space-2) var(--space-1);
+            }
+
+            .member-name {
+                font-size: var(--text-sm);
+                max-width: 100px;
+            }
+
+            .toast {
+                left: var(--space-4);
+                right: var(--space-4);
+                bottom: var(--space-4);
+                width: auto;
+            }
+        }
+
+        /* Very Small Screens */
+        @media (max-width: 380px) {
+            .tool-btn {
+                padding: var(--space-2) var(--space-3);
+                font-size: var(--text-xs);
+            }
+
+            .tier-badge {
+                font-size: 0.6rem;
+                padding: 2px 4px;
+            }
+
+            .input-minimal {
+                font-size: var(--text-xs);
+                padding: var(--space-1) var(--space-2);
+            }
+        }
+
+        /* Safe Area for Notched Devices */
+        @supports (padding: max(0px)) {
+            .toolbar {
+                padding-left: max(1rem, env(safe-area-inset-left));
+                padding-right: max(1rem, env(safe-area-inset-right));
+            }
+
+            .toast {
+                bottom: max(16px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            color: #898481;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-state button {
+            background: #34302D;
+            color: #F9F8F6;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .empty-state button:hover {
+            background: #2A2623;
+            transform: translateY(-2px);
+        }
+
+        [data-theme="dark"] .empty-state {
+            color: #888888;
+        }
+
+        [data-theme="dark"] .empty-state button {
+            background: #EDEDED;
+            color: #0F0F0F;
+        }
+
+        /* Header Typography Refinement */
+        .app-title h1 {
+            font-weight: 500;
+            letter-spacing: -0.02em;
         }
     </style>
 </head>
 
 <body>
     <!-- Background Elements -->
-    <div class="particles" id="particles"></div>
+    <div class="bg-noise"></div>
     <div id="toast" class="toast">
         <i class="fas fa-info-circle text-stone-400 mt-1"></i>
         <span id="toast-msg">Notification</span>
     </div>
 
     <!-- Drag Drop Overlay -->
-    <div id="drag-overlay" class="fixed inset-0 z-[3000] bg-stone-900/80 backdrop-blur-sm hidden flex-col items-center justify-center pointer-events-auto transition-opacity duration-300">
+    <div id="drag-overlay"
+        class="fixed inset-0 z-[3000] bg-stone-900/80 backdrop-blur-sm hidden flex-col items-center justify-center pointer-events-auto transition-opacity duration-300">
         <div class="animate-bounce mb-4">
             <i class="fas fa-file-import text-6xl text-stone-200"></i>
         </div>
         <h2 class="font-serif text-3xl text-stone-200">Drop Image to Scan</h2>
+    </div>
+
+    <!-- Command Palette -->
+    <div id="cmd-palette"
+        class="fixed inset-0 hidden bg-stone-900/50 backdrop-blur-sm items-start justify-center pt-[15vh]">
+        <div
+            class="bg-white dark:bg-stone-900 w-full max-w-lg rounded-xl shadow-2xl border border-stone-200 dark:border-stone-700 overflow-hidden flex flex-col max-h-[60vh]">
+            <div class="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center gap-3">
+                <i class="fas fa-search text-stone-400"></i>
+                <input type="text" id="cmd-input" placeholder="Type a command..."
+                    class="flex-1 bg-transparent outline-none text-stone-700 dark:text-stone-200" autocomplete="off">
+                <span
+                    class="text-xs bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded text-stone-500 font-mono">ESC</span>
+            </div>
+            <div id="cmd-results" class="overflow-y-auto p-2">
+                <!-- JS Injected -->
+            </div>
+        </div>
     </div>
 
     <!-- Hidden Inputs -->
@@ -488,38 +1301,46 @@
             <button class="helper-btn" onclick="quickAddDamage(1000000)">+1M</button>
             <button class="helper-btn" onclick="quickAddDamage(10000000)">+10M</button>
         </div>
-        <button class="helper-btn text-red-400 hover:bg-red-50 hover:text-red-500 w-full" onclick="quickAddDamage(0, true)">Clear</button>
+        <button class="helper-btn text-red-400 hover:bg-red-50 hover:text-red-500 w-full"
+            onclick="quickAddDamage(0, true)">Clear</button>
     </div>
 
     <!-- Main Container -->
     <div class="max-w-[1200px] mx-auto p-4 md:p-8 pb-32 relative z-10" id="main-container">
-        
+
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
             <div class="app-title">
-                <h1 class="font-serif text-4xl md:text-5xl font-bold text-stone-800 dark:text-stone-100 tracking-tight mb-2">
+                <h1
+                    class="font-serif text-4xl md:text-5xl font-bold text-stone-800 dark:text-stone-100 tracking-tight mb-2">
                     BossGuild
-                    <span class="text-xs align-middle bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-3 py-1 rounded-full font-sans font-medium uppercase tracking-widest ml-2">A4XX</span>
+                    <span
+                        class="text-xs align-middle bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 px-3 py-1 rounded-full font-sans font-medium uppercase tracking-widest ml-2">A4XX</span>
                 </h1>
-                <p class="text-stone-400 font-light text-sm tracking-wide">Tracker & Analytics</p>
+                <p class="text-stone-400 font-light text-sm tracking-wide">Seven Knights Re:Birth <span
+                        class="hidden md:inline text-stone-300 mx-2">|</span> <span
+                        class="text-xs text-stone-300 hidden md:inline">Tracker & Analytics</span></p>
             </div>
             <div class="flex gap-2">
-                <button class="tool-btn" onclick="toggleSound()" id="btn-sound"><i class="fas fa-volume-up"></i></button>
+                <button class="tool-btn" onclick="toggleSound()" id="btn-sound"><i
+                        class="fas fa-volume-up"></i></button>
                 <button class="tool-btn" onclick="toggleShortcuts()"><i class="fas fa-keyboard"></i></button>
                 <button class="tool-btn" onclick="toggleSettings()" title="Settings"><i class="fas fa-cog"></i></button>
-                <button class="tool-btn" onclick="toggleTheme()" title="Toggle Theme"><i class="fas fa-adjust"></i></button>
+                <button class="tool-btn" onclick="toggleTheme()" title="Toggle Theme"><i
+                        class="fas fa-adjust"></i></button>
             </div>
         </div>
 
         <!-- Dashboard -->
         <div class="glass-panel p-6 mb-8" id="dashboard-panel">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                
+
                 <!-- Chart 1 -->
                 <div class="relative h-64 flex items-center justify-center">
                     <canvas id="woodChart"></canvas>
                     <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span id="chart-percent" class="font-serif text-5xl font-medium text-stone-800 dark:text-stone-100">0%</span>
+                        <span id="chart-percent"
+                            class="font-serif text-5xl font-medium text-stone-800 dark:text-stone-100">0%</span>
                     </div>
                 </div>
 
@@ -530,35 +1351,43 @@
                         <div class="metric-icon"><i class="fas fa-bullseye"></i></div>
                         <div class="flex-1">
                             <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-1">Total Goal</h4>
-                            <p class="text-2xl font-semibold text-stone-800 dark:text-stone-100 leading-none" id="total-attempts">0</p>
+                            <p class="text-2xl font-semibold text-stone-800 dark:text-stone-100 leading-none"
+                                id="total-attempts">0</p>
                         </div>
                     </div>
-                    
+
                     <!-- Row 2: Completed / Remaining -->
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="metric-card metric-used p-3 gap-2">
-                            <div class="metric-icon w-10 h-10 text-sm"><i class="fas fa-check"></i></div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 truncate">Completed</h4>
-                                <p class="text-xl font-semibold value leading-none" id="used-attempts">0</p>
+                        <div class="metric-card metric-used p-3 gap-2 flex-col items-start">
+                            <div class="flex items-center gap-2 w-full">
+                                <div class="metric-icon w-9 h-9 text-sm flex-shrink-0"><i class="fas fa-check"></i>
+                                </div>
+                                <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wide">
+                                    Completed</h4>
                             </div>
+                            <p class="text-xl font-semibold value leading-none" id="used-attempts">0</p>
                         </div>
-                        <div class="metric-card metric-remain p-3 gap-2">
-                            <div class="metric-icon w-10 h-10 text-sm"><i class="fas fa-clock"></i></div>
-                            <div class="flex-1 min-w-0">
-                                <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 truncate">Remaining</h4>
-                                <p class="text-xl font-semibold value leading-none" id="remaining-attempts">0</p>
+                        <div class="metric-card metric-remain p-3 gap-2 flex-col items-start">
+                            <div class="flex items-center gap-2 w-full">
+                                <div class="metric-icon w-9 h-9 text-sm flex-shrink-0"><i class="fas fa-clock"></i>
+                                </div>
+                                <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wide">
+                                    Remaining</h4>
                             </div>
+                            <p class="text-xl font-semibold value leading-none" id="remaining-attempts">0</p>
                         </div>
                     </div>
 
                     <!-- Row 3: Avg / Missing -->
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 text-center">
-                            <div class="text-stone-400 text-xs font-medium uppercase tracking-wider mb-1">Daily Avg</div>
+                        <div
+                            class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 text-center">
+                            <div class="text-stone-400 text-xs font-medium uppercase tracking-wider mb-1">Daily Avg
+                            </div>
                             <div class="text-xl font-bold text-stone-700 dark:text-stone-200" id="daily-avg">0</div>
                         </div>
-                        <div class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 text-center">
+                        <div
+                            class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 text-center">
                             <div class="text-stone-400 text-xs font-medium uppercase tracking-wider mb-1">Missing</div>
                             <div class="text-lg font-bold text-stone-700 dark:text-stone-200" id="missing-count">0</div>
                         </div>
@@ -574,7 +1403,9 @@
 
         <!-- HP Panel -->
         <div class="glass-panel hp-panel mb-6" id="hp-panel">
-            <h3 class="font-serif text-lg text-stone-700 dark:text-stone-200 mb-6 border-b border-stone-100 dark:border-stone-700 pb-2">Boss Health Status</h3>
+            <h3
+                class="font-serif text-lg text-stone-700 dark:text-stone-200 mb-6 border-b border-stone-100 dark:border-stone-700 pb-2">
+                Boss Health Status</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="hp-grid">
                 <!-- JS Injects Here -->
             </div>
@@ -582,55 +1413,80 @@
 
         <!-- Toolbar -->
         <div class="mb-6 overflow-x-auto pb-2">
-            <div class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-full p-2 inline-flex items-center gap-1 shadow-sm">
-                <button class="tool-btn active" id="tab-1" onclick="switchPage(1)">Shadow</button>
-                <button class="tool-btn" id="tab-2" onclick="switchPage(2)">God of Destruction</button>
-                
+            <div
+                class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-full p-2 inline-flex items-center gap-1 shadow-sm">
+                <button class="tool-btn active" id="tab-1" onclick="switchPage(1)"
+                    aria-label="Switch to Shadow page">Shadow</button>
+                <button class="tool-btn" id="tab-2" onclick="switchPage(2)"
+                    aria-label="Switch to God of Destruction page">God of Destruction</button>
+
                 <div class="divider"></div>
-                
-                <button class="tool-btn" onclick="undo()" title="Undo"><i class="fas fa-undo"></i></button>
-                <button class="tool-btn" onclick="toggleCompact()" title="Compact View"><i class="fas fa-list"></i></button>
-                <button class="tool-btn" onclick="toggleMode()" id="btn-mode"><i class="fas fa-calculator"></i></button>
-                <button class="tool-btn" onclick="toggleFilter('risk')" id="btn-filter-risk"><i class="fas fa-filter"></i> Risk</button>
-                <button class="tool-btn" onclick="triggerOCR()" title="Scan Image"><i class="fas fa-camera"></i></button>
-                
+
+                <button class="tool-btn" onclick="undo()" title="Undo" aria-label="Undo last action"><i
+                        class="fas fa-undo"></i></button>
+                <button class="tool-btn" onclick="toggleCompact()" title="Compact View"
+                    aria-label="Toggle compact view"><i class="fas fa-list"></i></button>
+                <button class="tool-btn" onclick="toggleMode()" id="btn-mode" aria-label="Toggle Count/Damage mode"><i
+                        class="fas fa-calculator"></i></button>
+                <button class="tool-btn" onclick="toggleFilter('risk')" id="btn-filter-risk"
+                    aria-label="Filter at-risk members"><i class="fas fa-filter"></i> Risk</button>
+                <button class="tool-btn" onclick="triggerOCR()" title="Scan Image" aria-label="Scan image with OCR"><i
+                        class="fas fa-camera"></i></button>
+
                 <div class="divider"></div>
-                
-                <button class="tool-btn btn-copy" onclick="copyTextReport()"><i class="fas fa-copy"></i> Copy</button>
-                <button class="tool-btn" onclick="openExportModal()"><i class="fas fa-share-alt"></i></button>
-                
+
+                <button class="tool-btn btn-smart" onclick="copySmartReport()"
+                    aria-label="Copy smart report to clipboard"><i class="fas fa-clipboard-list"></i>
+                    Smart Report</button>
+                <button class="tool-btn btn-copy" onclick="copyTextReport()"
+                    aria-label="Copy simple report to clipboard"><i class="fas fa-copy"></i> Simple</button>
+                <button class="tool-btn" onclick="openExportModal()" aria-label="Open export options"><i
+                        class="fas fa-share-alt"></i></button>
+
                 <div class="divider"></div>
-                
-                <button class="tool-btn text-red-400 hover:text-red-600 hover:bg-red-50" onclick="resetWeek()"><i class="fas fa-trash-alt"></i></button>
+
+                <button class="tool-btn text-red-400 hover:text-red-600 hover:bg-red-50" onclick="resetWeek()"
+                    aria-label="Reset week and archive data"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
 
         <!-- Controls / Search -->
-        <div class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 mb-6 flex flex-wrap gap-4 items-end shadow-sm">
+        <div
+            class="bg-white dark:bg-stone-800 border border-stone-100 dark:border-stone-700 rounded-2xl p-4 mb-6 flex flex-wrap gap-4 items-end shadow-sm">
             <div>
                 <label class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Days</label>
-                <input type="number" id="totalDays" value="11" class="bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-200 font-medium text-center w-16 p-2 rounded focus:bg-white focus:outline-none focus:border-stone-400 transition-colors" onchange="updateGlobalDays()">
+                <input type="number" id="totalDays" value="11"
+                    class="bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-200 font-medium text-center w-16 p-2 rounded focus:bg-white focus:outline-none focus:border-stone-400 transition-colors"
+                    onchange="updateGlobalDays()">
             </div>
-            
+
             <div>
                 <label class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Members</label>
-                <div id="totalMembers" class="bg-stone-50 dark:bg-stone-900 text-stone-500 font-medium text-center w-16 p-2 rounded cursor-default border-b border-transparent">0</div>
+                <div id="totalMembers"
+                    class="bg-stone-50 dark:bg-stone-900 text-stone-500 font-medium text-center w-16 p-2 rounded cursor-default border-b border-transparent">
+                    0</div>
             </div>
 
             <div class="flex-1 min-w-[200px]">
                 <label class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Search</label>
                 <div class="relative">
                     <i class="fas fa-search absolute left-3 top-3 text-stone-400 text-xs"></i>
-                    <input type="text" id="searchInput" placeholder="Find member..." class="w-full bg-stone-50 dark:bg-stone-900 border border-transparent rounded-xl pl-9 pr-8 py-2 text-sm text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all" onkeyup="searchMembers()">
-                    <i class="fas fa-times absolute right-3 top-3 text-stone-400 cursor-pointer hover:text-stone-600" onclick="clearSearch()"></i>
+                    <input type="text" id="searchInput" placeholder="Find member..."
+                        class="w-full bg-stone-50 dark:bg-stone-900 border border-transparent rounded-xl pl-9 pr-8 py-2 text-sm text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all"
+                        onkeyup="searchMembers()">
+                    <i class="fas fa-times absolute right-3 top-3 text-stone-400 cursor-pointer hover:text-stone-600"
+                        onclick="clearSearch()"></i>
                 </div>
             </div>
 
             <div class="flex-1 min-w-[200px]">
                 <label class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 block">Add New</label>
                 <div class="flex gap-2">
-                    <input type="text" id="newMemberName" placeholder="Name..." class="flex-1 bg-stone-50 dark:bg-stone-900 border border-transparent rounded-xl px-4 py-2 text-sm text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all">
-                    <button class="bg-stone-800 text-white w-10 h-10 rounded-xl hover:bg-stone-700 transition-colors flex items-center justify-center" onclick="addMember()"><i class="fas fa-plus"></i></button>
+                    <input type="text" id="newMemberName" placeholder="Name..."
+                        class="flex-1 bg-stone-50 dark:bg-stone-900 border border-transparent rounded-xl px-4 py-2 text-sm text-stone-700 dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all">
+                    <button
+                        class="bg-stone-800 text-white w-10 h-10 rounded-xl hover:bg-stone-700 transition-colors flex items-center justify-center"
+                        onclick="addMember()"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
         </div>
@@ -646,18 +1502,18 @@
                 <tbody id="table-body">
                     <!-- JS Generated -->
                 </tbody>
-                <tfoot id="table-foot" class="bg-stone-50 dark:bg-stone-900 text-xs font-bold text-stone-500 uppercase">
+                <tfoot id="table-foot" class="text-xs font-bold text-stone-500 uppercase">
                     <!-- JS Generated -->
                 </tfoot>
             </table>
-            
+
             <!-- Empty State -->
-            <div id="empty-state" class="hidden text-center py-20">
-                <div class="w-20 h-20 bg-stone-50 dark:bg-stone-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-users text-3xl text-stone-300"></i>
-                </div>
-                <h3 class="font-serif text-xl text-stone-700 dark:text-stone-200 mb-2">No Members Yet</h3>
-                <p class="text-stone-400 text-sm">Add your first guild member to start tracking.</p>
+            <div id="empty-state" class="empty-state hidden">
+                <i class="fas fa-users-slash"></i>
+                <p>ยังไม่มีสมาชิก - เพิ่มสมาชิกกิลด์คนแรกเพื่อเริ่มติดตามข้อมูล</p>
+                <button onclick="document.getElementById('newMemberName').focus()">
+                    <i class="fas fa-plus mr-2"></i>Add Member
+                </button>
             </div>
         </div>
     </div>
@@ -668,15 +1524,18 @@
     <div class="modal-overlay" id="ocrProgressModal" style="z-index: 2500;">
         <div class="modal max-w-sm text-center">
             <div class="mb-6 flex justify-center">
-                 <div class="w-16 h-16 bg-stone-50 dark:bg-stone-800 rounded-full flex items-center justify-center animate-bounce">
+                <div
+                    class="w-16 h-16 bg-stone-50 dark:bg-stone-800 rounded-full flex items-center justify-center animate-bounce">
                     <i class="fas fa-camera text-2xl text-stone-400"></i>
-                 </div>
+                </div>
             </div>
             <h3 class="font-serif text-xl text-stone-800 dark:text-stone-100 mb-2">Scanning</h3>
             <p id="ocrStatusText" class="text-sm text-stone-400 mb-6 font-medium">Initializing...</p>
-            
+
             <div class="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2 overflow-hidden">
-                <div id="ocrProgressBar" class="bg-stone-800 dark:bg-stone-200 h-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                <div id="ocrProgressBar"
+                    class="bg-stone-800 dark:bg-stone-200 h-full transition-all duration-300 ease-out"
+                    style="width: 0%"></div>
             </div>
             <div id="ocrProgressPercent" class="text-xs text-stone-400 mt-2 font-mono">0%</div>
         </div>
@@ -685,55 +1544,71 @@
     <!-- Export Modal -->
     <div class="modal-overlay" id="exportModal">
         <div class="modal">
-            <div class="flex justify-between items-center mb-8 pb-4 border-b border-stone-100 dark:border-stone-700">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-100 dark:border-stone-700">
                 <h3 class="font-serif text-2xl text-stone-800 dark:text-stone-100">Share & Export</h3>
-                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('exportModal')"><i class="fas fa-times text-xl"></i></button>
+                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('exportModal')"><i
+                        class="fas fa-times text-xl"></i></button>
             </div>
-            
+
             <div class="grid grid-cols-2 gap-4 mb-8">
                 <div class="export-option" onclick="generateShareLink()">
                     <div class="export-icon"><i class="fas fa-link"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Copy Link</h4><p class="text-xs text-stone-400">Share URL</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Copy Link</h4>
+                        <p class="text-xs text-stone-400">Share URL</p>
+                    </div>
                 </div>
                 <div class="export-option" onclick="exportImage('standard')">
                     <div class="export-icon"><i class="fas fa-image"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Save Image</h4><p class="text-xs text-stone-400">PNG Format</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Save Image</h4>
+                        <p class="text-xs text-stone-400">PNG Format</p>
+                    </div>
                 </div>
                 <div class="export-option" onclick="exportImage('story')">
                     <div class="export-icon"><i class="fab fa-instagram"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">IG Story</h4><p class="text-xs text-stone-400">Vertical Format</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">IG Story</h4>
+                        <p class="text-xs text-stone-400">Vertical Format</p>
+                    </div>
                 </div>
                 <div class="export-option" onclick="exportPDF()">
                     <div class="export-icon"><i class="fas fa-file-pdf"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Report PDF</h4><p class="text-xs text-stone-400">Printable</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Report PDF</h4>
+                        <p class="text-xs text-stone-400">Printable</p>
+                    </div>
                 </div>
                 <div class="export-option" onclick="exportJSON()">
                     <div class="export-icon"><i class="fas fa-download"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Backup</h4><p class="text-xs text-stone-400">JSON File</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Backup</h4>
+                        <p class="text-xs text-stone-400">JSON File</p>
+                    </div>
                 </div>
                 <div class="export-option" onclick="triggerImportJSON()">
                     <div class="export-icon"><i class="fas fa-upload"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Restore</h4><p class="text-xs text-stone-400">From JSON</p></div>
-                </div>
-                <div class="export-option" onclick="exportCSV()">
-                    <div class="export-icon"><i class="fas fa-file-csv"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Excel</h4><p class="text-xs text-stone-400">CSV Data</p></div>
-                </div>
-                <div class="export-option" onclick="triggerImportCSV()">
-                    <div class="export-icon"><i class="fas fa-file-import"></i></div>
-                    <div><h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Import CSV</h4><p class="text-xs text-stone-400">Load Data</p></div>
+                    <div>
+                        <h4 class="font-semibold text-stone-700 dark:text-stone-200 text-sm">Restore</h4>
+                        <p class="text-xs text-stone-400">From JSON</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="border-t border-stone-100 dark:border-stone-700 pt-6">
-                <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Auto Backups</h4>
-                <div id="backup-container" class="space-y-2"></div>
+            <!-- History Section -->
+            <div class="border-t border-stone-100 dark:border-stone-700 pt-4 mb-4">
+                <h4 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">History Archives</h4>
+                <div id="history-container" class="history-list">
+                    <!-- History items will be injected here -->
+                    <div class="text-center text-stone-400 text-xs py-4">No archives found. Reset the week to create
+                        one.</div>
+                </div>
             </div>
 
-            <div class="mt-8 flex justify-center">
+            <div class="mt-4 flex justify-center">
                 <div id="qrcode" class="p-2 bg-white border border-stone-100 rounded-xl"></div>
             </div>
-            
+
             <input type="file" id="jsonImportInput" accept=".json" class="hidden" onchange="handleJSONImport(this)">
             <input type="file" id="csvImportInput" accept=".csv" class="hidden" onchange="handleCSVImport(this)">
         </div>
@@ -743,14 +1618,16 @@
     <div class="modal-overlay" id="profileModal">
         <div class="modal">
             <div class="flex items-center gap-4 mb-6 pb-6 border-b border-stone-100 dark:border-stone-700">
-                <div class="w-16 h-16 rounded-2xl bg-stone-800 text-white flex items-center justify-center text-2xl font-serif" id="profile-avatar">A</div>
+                <div class="w-16 h-16 rounded-2xl bg-stone-800 text-white flex items-center justify-center text-2xl font-serif"
+                    id="profile-avatar">A</div>
                 <div class="flex-1">
                     <h2 id="profile-name" class="font-serif text-2xl text-stone-800 dark:text-stone-100">Name</h2>
                     <span class="text-xs text-stone-400 uppercase tracking-widest">Guild Member</span>
                 </div>
-                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('profileModal')"><i class="fas fa-times text-xl"></i></button>
+                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('profileModal')"><i
+                        class="fas fa-times text-xl"></i></button>
             </div>
-            
+
             <div class="flex gap-4 mb-6">
                 <div class="flex-1 bg-stone-50 dark:bg-stone-800 rounded-xl p-4 text-center">
                     <div class="text-xs text-stone-400 uppercase tracking-wider mb-1">Daily Avg</div>
@@ -766,14 +1643,19 @@
                 <canvas id="profileRadarChart"></canvas>
             </div>
 
-            <div id="profile-stats" class="space-y-2 text-sm text-stone-600 dark:text-stone-300 border-t border-stone-100 dark:border-stone-700 pt-4 mb-4"></div>
+            <div id="profile-stats"
+                class="space-y-2 text-sm text-stone-600 dark:text-stone-300 border-t border-stone-100 dark:border-stone-700 pt-4 mb-4">
+            </div>
 
             <div>
                 <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Notes</label>
-                <textarea id="profile-note" rows="3" class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all"></textarea>
+                <textarea id="profile-note" rows="3"
+                    class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all"></textarea>
             </div>
-            
-            <button class="w-full mt-6 bg-stone-800 text-white py-3 rounded-xl font-medium hover:bg-stone-700 transition-colors" onclick="saveProfileNote()">Save Details</button>
+
+            <button
+                class="w-full mt-6 bg-stone-800 text-white py-3 rounded-xl font-medium hover:bg-stone-700 transition-colors"
+                onclick="saveProfileNote()">Save Details</button>
         </div>
     </div>
 
@@ -782,27 +1664,80 @@
         <div class="modal">
             <div class="flex justify-between items-center mb-8 pb-4 border-b border-stone-100 dark:border-stone-700">
                 <h3 class="font-serif text-2xl text-stone-800 dark:text-stone-100">Settings</h3>
-                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('settingsModal')"><i class="fas fa-times text-xl"></i></button>
+                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('settingsModal')"><i
+                        class="fas fa-times text-xl"></i></button>
             </div>
 
             <div class="space-y-6">
                 <div>
-                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Max Boss HP</label>
-                    <input type="number" id="settingMaxHP" class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all">
-                </div>
-                
-                <div class="border-t border-stone-100 dark:border-stone-700 pt-6">
-                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Bulk Add Members (One per line)</label>
-                    <textarea id="bulkNames" rows="6" class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all" placeholder="Name1&#10;Name2&#10;Name3"></textarea>
-                    <button class="w-full mt-4 bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 py-3 rounded-xl font-medium hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors" onclick="bulkImportMembers()">Import Names</button>
+                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Max Boss
+                        HP</label>
+                    <input type="number" id="settingMaxHP"
+                        class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all">
                 </div>
 
-                <button class="w-full bg-stone-800 text-white py-3 rounded-xl font-medium hover:bg-stone-700 transition-colors" onclick="saveSettings()">Save Configuration</button>
+                <!-- Tier Config -->
+                <div>
+                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Tier Thresholds
+                        (Avg Damage)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <div>
+                            <span class="text-[10px] text-stone-400 block text-center mb-1">S</span>
+                            <input type="number" id="tierS"
+                                class="w-full bg-stone-50 dark:bg-stone-800 text-center rounded-lg p-2 text-xs">
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-stone-400 block text-center mb-1">A</span>
+                            <input type="number" id="tierA"
+                                class="w-full bg-stone-50 dark:bg-stone-800 text-center rounded-lg p-2 text-xs">
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-stone-400 block text-center mb-1">B</span>
+                            <input type="number" id="tierB"
+                                class="w-full bg-stone-50 dark:bg-stone-800 text-center rounded-lg p-2 text-xs">
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-stone-400 block text-center mb-1">C</span>
+                            <input type="number" id="tierC"
+                                class="w-full bg-stone-50 dark:bg-stone-800 text-center rounded-lg p-2 text-xs">
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-stone-400 block text-center mb-1">D</span>
+                            <input type="number" id="tierD"
+                                class="w-full bg-stone-50 dark:bg-stone-800 text-center rounded-lg p-2 text-xs">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">OCR
+                        Keywords</label>
+                    <input type="text" id="settingOCRKeywords"
+                        class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all"
+                        placeholder="e.g. à¸—à¹‰à¸²à¸—à¸²à¸¢, à¸„à¸£à¸±à¹‰à¸‡, Attack, Times">
+                </div>
+
+                <div class="border-t border-stone-100 dark:border-stone-700 pt-6">
+                    <label class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">Bulk Add
+                        Members (One per line)</label>
+                    <textarea id="bulkNames" rows="4"
+                        class="w-full bg-stone-50 dark:bg-stone-800 border border-transparent rounded-xl p-3 text-sm dark:text-stone-200 focus:bg-white dark:focus:bg-stone-700 focus:border-stone-200 focus:outline-none transition-all"
+                        placeholder="Name1&#10;Name2&#10;Name3"></textarea>
+                    <button
+                        class="w-full mt-4 bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 py-3 rounded-xl font-medium hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors"
+                        onclick="bulkImportMembers()">Import Names</button>
+                </div>
+
+                <button
+                    class="w-full bg-stone-800 text-white py-3 rounded-xl font-medium hover:bg-stone-700 transition-colors"
+                    onclick="saveSettings()">Save Configuration</button>
 
                 <div class="border-t border-stone-100 dark:border-stone-700 pt-6 mt-6">
                     <div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4">
                         <h4 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">Danger Zone</h4>
-                        <button class="w-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 py-3 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors" onclick="factoryReset()">Factory Reset (Clear All Data)</button>
+                        <button
+                            class="w-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 py-3 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors"
+                            onclick="factoryReset()">Factory Reset (Clear All Data)</button>
                     </div>
                 </div>
             </div>
@@ -814,12 +1749,20 @@
         <div class="modal text-center">
             <h3 class="font-serif text-2xl mb-6 text-stone-800 dark:text-stone-100">Keyboard Shortcuts</h3>
             <div class="text-left space-y-4 text-stone-600 dark:text-stone-300">
-                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Undo last action</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + Z</kbd></div>
-                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Force Save</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + S</kbd></div>
-                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Scan Image (OCR)</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + V</kbd></div>
-                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Close Modals</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Esc</kbd></div>
+                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Command
+                        Palette</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + K</kbd>
+                </div>
+                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Undo last
+                        action</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + Z</kbd></div>
+                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Force
+                        Save</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + S</kbd></div>
+                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Scan Image
+                        (OCR)</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Ctrl + V</kbd></div>
+                <div class="flex justify-between border-b border-stone-100 dark:border-stone-700 pb-2"><span>Close
+                        Modals</span> <kbd class="bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">Esc</kbd></div>
             </div>
-            <button class="w-full mt-8 bg-stone-800 text-white py-3 rounded-xl font-medium" onclick="closeModal('shortcutsModal')">Close</button>
+            <button class="w-full mt-8 bg-stone-800 text-white py-3 rounded-xl font-medium"
+                onclick="closeModal('shortcutsModal')">Close</button>
         </div>
     </div>
 
@@ -828,7 +1771,8 @@
         <div class="modal">
             <div class="flex justify-between items-center mb-8 pb-4 border-b border-stone-100 dark:border-stone-700">
                 <h3 class="font-serif text-2xl text-stone-800 dark:text-stone-100">Select Boss</h3>
-                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('ocrBossModal')"><i class="fas fa-times text-xl"></i></button>
+                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('ocrBossModal')"><i
+                        class="fas fa-times text-xl"></i></button>
             </div>
             <p class="text-center text-stone-500 mb-8">Which boss results are you scanning?</p>
             <div class="ocr-grid" id="ocr-options">
@@ -849,9 +1793,58 @@
     </div>
 
     <script>
+        // ====================================
+        // CONFIG - Named Constants (No Magic Numbers)
+        // ====================================
+        const CONFIG = {
+            ONE_MILLION: 1_000_000,
+            MAX_ARCHIVES: 10,
+            DEFAULT_DAYS: 11,
+            MAX_COUNT: 50,
+            MIN_SCORE_THRESHOLD: 1000,
+            DEBOUNCE_MS: 300,
+            TOAST_DURATION: 3000,
+            DEBUG: {
+                OCR: true,
+                RENDER: false
+            }
+        };
+
+        // ====================================
+        // SECURITY UTILITIES
+        // ====================================
+
+        // XSS Prevention - Escape HTML entities
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        // Input Validation - Parse and clamp numeric values
+        function parseNumericInput(val, min = 0, max = 999999999) {
+            const cleaned = String(val).replace(/[^\d.-]/g, '');
+            let num = parseInt(cleaned) || 0;
+            return Math.max(min, Math.min(max, Math.abs(num)));
+        }
+
+        // Debounce utility for performance
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         // --- State & Constants ---
         let CONSTANTS = {
-            ICONS: ['⚔️', '🏹', '🔮', '🛡️', '🐉'],
+            ICONS: ['âš”ï¸', 'ðŸ¹', 'ðŸ”®', 'ðŸ›¡ï¸', 'ðŸ‰'],
             BOSS_NAMES: ['Teo', 'Kyle', 'Yeonhee', 'Karma'],
             BOSS_IMAGES: [
                 'Teo.png',    // Index 0: Teo Placeholder
@@ -870,6 +1863,7 @@
             deadBosses: { 1: [false, false, false, false], 2: [false] },
             members: [],
             history: [],
+            archives: [],
             historyIndex: -1,
             filter: 'all',
             compact: false,
@@ -880,11 +1874,30 @@
             selectedMember: null,
             mode: 'count', // 'count' or 'damage'
             sort: { key: null, order: 'desc', index: -1 },
-            config: { bossMaxHp: 100000000 },
-            goalReached: false
+            config: {
+                bossMaxHp: 100000000,
+                ocrKeywords: "à¸—à¹‰à¸²à¸—à¸²à¸¢, à¹‚à¸ˆà¸¡à¸•à¸µ, à¸•à¸µ, à¸£à¸­à¸š, à¸„à¸£à¸±à¹‰à¸‡, Attack, Times",
+                tiers: { s: 1500000, a: 1200000, b: 1000000, c: 800000, d: 500000 }
+            },
+            goalReached: false,
+            storyChart: null  // Track story chart to prevent memory leak
         };
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Command Palette Defs
+        const COMMANDS = [
+            { id: 'add', icon: 'fa-user-plus', label: 'Add New Member', action: () => { document.getElementById('newMemberName').focus(); } },
+            { id: 'ocr', icon: 'fa-camera', label: 'Scan Image (OCR)', action: triggerOCR },
+            { id: 'theme', icon: 'fa-adjust', label: 'Toggle Theme', action: toggleTheme },
+            { id: 'smart', icon: 'fa-clipboard-list', label: 'Smart Report', action: copySmartReport },
+            { id: 'export', icon: 'fa-share-alt', label: 'Export Data', action: openExportModal },
+            { id: 'reset', icon: 'fa-trash', label: 'Reset Week (Archive)', action: resetWeek },
+            { id: 'sound', icon: 'fa-volume-up', label: 'Toggle Sound', action: toggleSound },
+            { id: 'shadow', icon: 'fa-ghost', label: 'Switch to Shadow', action: () => switchPage(1) },
+            { id: 'god', icon: 'fa-dragon', label: 'Switch to God of Destruction', action: () => switchPage(2) },
+            { id: 'mode', icon: 'fa-calculator', label: 'Toggle Count/Damage', action: toggleMode },
+        ];
 
         function playTone(type) {
             if (!STATE.soundEnabled) return;
@@ -922,13 +1935,11 @@
             loadData();
             initCharts();
             render();
+            renderHistoryList();
             setupShortcuts();
             populateOCRModal();
             setupDragAndDrop();
-
-            // Auto Backup Interval (5 mins)
-            setInterval(autoBackup, 300000);
-            renderBackups();
+            setupCommandPalette();
 
             // Check for Share Data in URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -954,6 +1965,62 @@
             });
         });
 
+        // --- Command Palette Logic ---
+        function setupCommandPalette() {
+            const input = document.getElementById('cmd-input');
+            const list = document.getElementById('cmd-results');
+            const modal = document.getElementById('cmd-palette');
+
+            renderCommands('');
+
+            input.addEventListener('input', (e) => {
+                renderCommands(e.target.value);
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) toggleCommandPalette(false);
+            });
+        }
+
+        function toggleCommandPalette(show) {
+            const modal = document.getElementById('cmd-palette');
+            const input = document.getElementById('cmd-input');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                input.value = '';
+                renderCommands('');
+                input.focus();
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderCommands(term) {
+            const list = document.getElementById('cmd-results');
+            list.innerHTML = '';
+            const t = term.toLowerCase();
+
+            const matches = COMMANDS.filter(c => c.label.toLowerCase().includes(t));
+
+            if (matches.length === 0) {
+                list.innerHTML = '<div class="p-4 text-center text-stone-400 text-sm">No commands found</div>';
+                return;
+            }
+
+            matches.forEach((c, i) => {
+                const div = document.createElement('div');
+                div.className = `cmd-item p-3 rounded-lg flex items-center gap-3 text-stone-600 dark:text-stone-300 ${i === 0 ? 'selected' : ''}`;
+                div.innerHTML = `<div class="w-8 flex justify-center"><i class="fas ${c.icon}"></i></div> <span class="font-medium">${c.label}</span>`;
+                div.onclick = () => {
+                    toggleCommandPalette(false);
+                    c.action();
+                };
+                list.appendChild(div);
+            });
+        }
+
         function populateOCRModal() {
             const container = document.getElementById('ocr-options');
             let html = '';
@@ -975,13 +2042,13 @@
 
         // --- Data Management ---
         function saveState(action = 'update') {
-            // History Push
+            // History Push (Undo)
             if (STATE.historyIndex < STATE.history.length - 1) STATE.history = STATE.history.slice(0, STATE.historyIndex + 1);
             STATE.history.push(JSON.stringify({ members: STATE.members, deadBosses: STATE.deadBosses }));
             STATE.historyIndex++;
             if (STATE.history.length > 20) { STATE.history.shift(); STATE.historyIndex--; }
 
-            // LocalStorage
+            // LocalStorage with Error Handling (BUG-001 Fix)
             const data = {
                 members: STATE.members,
                 days1: STATE.days1,
@@ -990,17 +2057,66 @@
                 theme: document.documentElement.getAttribute('data-theme'),
                 mode: STATE.mode,
                 sort: STATE.sort,
-                config: STATE.config
+                config: STATE.config,
+                archives: STATE.archives
             };
-            localStorage.setItem('bossGuildData', JSON.stringify(data));
+
+            try {
+                localStorage.setItem('bossGuildData', JSON.stringify(data));
+            } catch (e) {
+                if (e.name === 'QuotaExceededError' || e.code === 22) {
+                    // Try to free space by removing old archives
+                    if (STATE.archives.length > 0) {
+                        STATE.archives.shift();
+                        showToast('⚠️ Storage เต็ม - ลบ archive เก่าแล้ว', 'warning');
+                        try {
+                            localStorage.setItem('bossGuildData', JSON.stringify(data));
+                        } catch (e2) {
+                            showToast('❌ Storage เต็ม! กรุณา export ข้อมูล', 'danger');
+                        }
+                        return;
+                    }
+                    showToast('❌ Storage เต็ม! กรุณา export ข้อมูลก่อน', 'danger');
+                } else if (e.name === 'SecurityError') {
+                    console.warn('localStorage disabled (Private mode?):', e);
+                }
+            }
             updateAnalytics();
+        }
+
+        // BUG-007 Fix: Validate tier config values
+        function validateTierConfig(tiers) {
+            const defaults = { s: 1500000, a: 1200000, b: 1000000, c: 800000, d: 500000 };
+            const result = {};
+
+            for (const [key, defaultVal] of Object.entries(defaults)) {
+                const val = tiers?.[key];
+                result[key] = (typeof val === 'number' && val > 0) ? val : defaultVal;
+            }
+
+            // Ensure proper order: s > a > b > c > d
+            if (result.s <= result.a) result.a = Math.floor(result.s * 0.8);
+            if (result.a <= result.b) result.b = Math.floor(result.a * 0.83);
+            if (result.b <= result.c) result.c = Math.floor(result.b * 0.8);
+            if (result.c <= result.d) result.d = Math.floor(result.c * 0.625);
+
+            return result;
         }
 
         function loadData() {
             const stored = localStorage.getItem('bossGuildData');
             if (stored) {
-                const data = JSON.parse(stored);
-                // Ensure 'd' (damage) array exists for old data
+                // BUG-002 Fix: Safe JSON parsing
+                let data;
+                try {
+                    data = JSON.parse(stored);
+                } catch (e) {
+                    console.error('Corrupt localStorage data:', e);
+                    showToast('⚠️ ข้อมูลเดิมเสียหาย - เริ่มต้นใหม่', 'warning');
+                    localStorage.removeItem('bossGuildData');
+                    return;
+                }
+
                 STATE.members = (data.members || []).map(m => ({
                     ...m,
                     d: m.d || [0, 0, 0, 0],
@@ -1012,8 +2128,15 @@
                 STATE.deadBosses = data.deadBosses || { 1: [false, false, false, false], 2: [false] };
                 STATE.mode = data.mode || 'count';
                 STATE.sort = data.sort || { key: null, order: 'desc', index: -1 };
-                STATE.config = data.config || { bossMaxHp: 100000000 };
-                
+                // Load config with validated tiers (BUG-007 Fix)
+                STATE.config = {
+                    bossMaxHp: (typeof data.config?.bossMaxHp === 'number' && data.config.bossMaxHp > 0)
+                        ? data.config.bossMaxHp : 100000000,
+                    ocrKeywords: data.config?.ocrKeywords || "ท้าทาย, โจมตี, ตี, รอบ, ครั้ง, Attack, Times",
+                    tiers: validateTierConfig(data.config?.tiers)
+                };
+                STATE.archives = data.archives || [];
+
                 CONSTANTS.BOSS_MAX_HP = STATE.config.bossMaxHp;
 
                 if (data.theme) document.documentElement.setAttribute('data-theme', data.theme);
@@ -1048,48 +2171,79 @@
             }
         }
 
-        // --- Auto Backup System ---
-        function autoBackup() {
-            const currentData = localStorage.getItem('bossGuildData');
-            const now = new Date().toLocaleString();
-            // Shift backups
-            localStorage.setItem('backup_3', localStorage.getItem('backup_2'));
-            localStorage.setItem('backup_2', localStorage.getItem('backup_1'));
-            localStorage.setItem('backup_1', JSON.stringify({ data: currentData, time: now }));
-            renderBackups();
+        // --- Archive & Reset System ---
+        function resetWeek() {
+            if (!confirm("âš ï¸ ARCHIVE & RESET\n\nThis will save the current data to the Archive and reset ALL attempts/damage to 0.\n\nAre you sure?")) return;
+
+            // 1. Create Archive Snapshot
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+
+            // Calculate basic stats for the label
+            let totalDamage = 0;
+            STATE.members.forEach(m => {
+                totalDamage += (m.d || []).reduce((a, b) => a + b, 0);
+            });
+
+            const snapshot = {
+                id: Date.now(),
+                date: dateStr,
+                members: JSON.parse(JSON.stringify(STATE.members)),
+                summary: `Members: ${STATE.members.length} | Dmg: ${(totalDamage / 1000000).toFixed(0)}M`
+            };
+
+            // 2. Push to Archives
+            STATE.archives.unshift(snapshot);
+            if (STATE.archives.length > 10) STATE.archives.pop(); // Keep last 10
+
+            // 3. Reset Data
+            STATE.members.forEach(m => {
+                m.v = [0, 0, 0, 0];
+                m.d = [0, 0, 0, 0];
+                m.v2 = 0;
+            });
+            STATE.deadBosses = { 1: [false, false, false, false], 2: [false] };
+
+            saveState('reset');
+            render();
+            renderHistoryList();
+            showToast("Week Archived & Reset", "success");
+            playTone('delete');
         }
 
-        function renderBackups() {
-            const container = document.getElementById('backup-container');
-            container.innerHTML = '';
-            for (let i = 1; i <= 3; i++) {
-                const b = localStorage.getItem(`backup_${i}`);
-                if (b) {
-                    const parsed = JSON.parse(b);
-                    if (parsed.time) {
-                        const div = document.createElement('div');
-                        div.className = 'backup-item';
-                        div.innerHTML = `<span>Backup ${i} (${parsed.time})</span> <button class="backup-restore-btn" onclick="restoreBackup(${i})">Restore</button>`;
-                        container.appendChild(div);
-                    }
-                }
+        function renderHistoryList() {
+            const container = document.getElementById('history-container');
+            if (STATE.archives.length === 0) {
+                container.innerHTML = '<div class="text-center text-stone-400 text-xs py-4">No archives found. Reset the week to create one.</div>';
+                return;
             }
+
+            let html = '';
+            STATE.archives.forEach((arch, idx) => {
+                html += `
+                <div class="history-item">
+                    <div>
+                        <div class="font-bold text-sm text-stone-700 dark:text-stone-200">${arch.date}</div>
+                        <div class="text-xs text-stone-400">${arch.summary}</div>
+                    </div>
+                    <button class="bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 text-xs px-3 py-1 rounded hover:bg-stone-300 transition" onclick="loadArchive(${idx})">Load</button>
+                </div>`;
+            });
+            container.innerHTML = html;
         }
 
-        function restoreBackup(idx) {
-            const b = localStorage.getItem(`backup_${idx}`);
-            if (b) {
-                const parsed = JSON.parse(b);
-                if (parsed.data) {
-                    importData(JSON.parse(parsed.data));
-                    showToast(`Restored Backup ${idx}`, 'success');
-                    closeModal('exportModal');
-                }
-            }
+        function loadArchive(idx) {
+            if (!confirm("Load this archive? Current unsaved data will be overwritten.")) return;
+            const arch = STATE.archives[idx];
+            STATE.members = JSON.parse(JSON.stringify(arch.members));
+            saveState('loadArchive');
+            render();
+            closeModal('exportModal');
+            showToast(`Loaded Archive: ${arch.date}`, "success");
         }
 
         function factoryReset() {
-            if (confirm("⚠️ DANGER: FACTORY RESET\n\nThis will completely wipe ALL your data and cannot be undone.\n\nAre you absolutely sure?")) {
+            if (confirm("âš ï¸ DANGER: FACTORY RESET\n\nThis will completely wipe ALL your data including Archives.\n\nAre you absolutely sure?")) {
                 localStorage.removeItem('bossGuildData');
                 location.reload();
             }
@@ -1109,6 +2263,20 @@
             };
         }
 
+        function calculateTier(m) {
+            const totalDmg = (m.d || []).reduce((a, b) => a + b, 0);
+            const totalHits = (m.v || []).reduce((a, b) => a + b, 0);
+            const avg = totalHits > 0 ? (totalDmg / totalHits) : 0;
+            const t = STATE.config.tiers;
+
+            if (avg >= t.s) return { label: 'S', class: 'tier-s', avg, totalDmg };
+            if (avg >= t.a) return { label: 'A', class: 'tier-a', avg, totalDmg };
+            if (avg >= t.b) return { label: 'B', class: 'tier-b', avg, totalDmg };
+            if (avg >= t.c) return { label: 'C', class: 'tier-c', avg, totalDmg };
+            if (avg >= t.d) return { label: 'D', class: 'tier-d', avg, totalDmg };
+            return { label: 'E', class: 'tier-e', avg, totalDmg };
+        }
+
         function updateAnalytics() {
             const days = STATE.page === 1 ? STATE.days1 : STATE.days2;
             let grandTotal = 0;
@@ -1120,7 +2288,7 @@
             STATE.members.forEach(m => {
                 const stats = getMemberStats(m);
                 grandTotal += stats.total;
-                
+
                 if (stats.total < days) {
                     missingCount++;
                 }
@@ -1147,22 +2315,21 @@
             const percentVal = parseFloat(percent);
             if (percentVal >= 100 && !STATE.goalReached) {
                 STATE.goalReached = true;
-                showToast("🎉 Goal Complete!", "success");
+                showToast("ðŸŽ‰ Goal Complete!", "success");
                 var duration = 3 * 1000;
                 var animationEnd = Date.now() + duration;
                 var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-                
-                var random = function(min, max) { return Math.random() * (max - min) + min; }
 
-                var interval = setInterval(function() {
-                  var timeLeft = animationEnd - Date.now();
-                  if (timeLeft <= 0) { return clearInterval(interval); }
-                  var particleCount = 50 * (timeLeft / duration);
-                  // Stone Theme Colors
-                  const colors = ['#78716C', '#D6D3D1', '#E7E5E4', '#F5F5F4'];
-                  
-                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 }, colors: colors }));
-                  confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 }, colors: colors }));
+                var random = function (min, max) { return Math.random() * (max - min) + min; }
+
+                var interval = setInterval(function () {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) { return clearInterval(interval); }
+                    var particleCount = 50 * (timeLeft / duration);
+                    const colors = ['#78716C', '#D6D3D1', '#E7E5E4', '#F5F5F4'];
+
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 }, colors: colors }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 }, colors: colors }));
                 }, 250);
             } else if (percentVal < 100) {
                 STATE.goalReached = false;
@@ -1175,8 +2342,7 @@
 
             const dailyAvg = STATE.members.length > 0 ? (grandTotal / STATE.members.length).toFixed(1) : 0;
             document.getElementById('daily-avg').innerText = dailyAvg;
-            
-            // Missing Count Logic
+
             const missingEl = document.getElementById('missing-count');
             if (missingCount === 0) {
                 missingEl.innerText = "All Done";
@@ -1189,7 +2355,7 @@
             // Update Charts
             if (STATE.chart) {
                 STATE.chart.data.datasets[0].data = [grandTotal, Math.max(0, totalPossible - grandTotal)];
-                STATE.chart.data.datasets[0].backgroundColor = ['#D97706', '#E7E5E4']; // Amber, Stone
+                STATE.chart.data.datasets[0].backgroundColor = ['#D97706', '#E7E5E4'];
                 STATE.chart.update();
             }
             if (STATE.barChart) {
@@ -1197,7 +2363,7 @@
                     STATE.barChart.data.labels = CONSTANTS.BOSS_NAMES;
                     STATE.barChart.data.datasets[0].label = STATE.mode === 'damage' ? 'Total Damage' : 'Attempts';
                     STATE.barChart.data.datasets[0].data = STATE.mode === 'damage' ? bossDamage : bossTotals;
-                    STATE.barChart.data.datasets[0].backgroundColor = '#A8A29E'; // Stone 400
+                    STATE.barChart.data.datasets[0].backgroundColor = '#A8A29E';
                 } else {
                     STATE.barChart.data.labels = ['God of Destruction'];
                     STATE.barChart.data.datasets[0].data = [grandTotal];
@@ -1213,9 +2379,8 @@
                     const dmg = bossDamage[i];
                     const p = Math.min(100, (dmg / CONSTANTS.BOSS_MAX_HP) * 100).toFixed(1);
                     const isDead = STATE.deadBosses[1][i];
-                    // Refined HP Colors
-                    const barColor = Number(p) >= 100 ? '#57534E' : '#D97706'; // Stone vs Amber
-                    
+                    const barColor = Number(p) >= 100 ? '#57534E' : '#D97706';
+
                     hpHTML += `
                     <div class="hp-card" style="${isDead ? 'opacity:0.5; filter:grayscale(1);' : ''}">
                         <div class="flex justify-between items-center mb-2">
@@ -1244,7 +2409,6 @@
             const tbody = document.getElementById('table-body');
             const tfoot = document.getElementById('table-foot');
 
-            // Mode Button State
             const btnMode = document.getElementById('btn-mode');
             btnMode.innerHTML = STATE.mode === 'damage' ? '<i class="fas fa-calculator"></i> Dmg' : '<i class="fas fa-calculator"></i> Count';
             btnMode.classList.toggle('active', STATE.mode === 'damage');
@@ -1284,13 +2448,14 @@
             const dmgSum = [0, 0, 0, 0];
 
             STATE.members.forEach((m, idx) => {
-                // Filter Logic
                 const term = document.getElementById('searchInput').value.toLowerCase();
                 if (term && !m.name.toLowerCase().includes(term)) return;
 
                 const stats = getMemberStats(m);
                 if (STATE.filter === 'risk' && !stats.isRisk) return;
 
+                // Tier Calculation
+                const tier = calculateTier(m);
                 let rowClass = stats.isRisk ? 'status-risk' : (stats.isPerfect ? 'status-god' : '');
 
                 // Inputs
@@ -1301,7 +2466,6 @@
                         if (m.d) dmgSum[i] += m.d[i];
                         const isDead = STATE.deadBosses[1][i];
 
-                        // Switch between damage input and count input
                         const isDamageMode = STATE.mode === 'damage';
                         const displayVal = isDamageMode ? (m.d[i] || 0).toLocaleString() : val;
                         const inputClass = isDamageMode ? 'input-minimal input-damage' : 'input-minimal';
@@ -1319,10 +2483,8 @@
                     inputs += `<td class="${isDead ? 'cell-dead' : ''}"><input type="number" class="input-minimal" value="${m.v2}" onchange="updateVal(${idx}, -1, this.value)"></td>`;
                 }
 
-                // Total Column Display
                 let totalDisplay = stats.total;
                 if (STATE.page === 1 && STATE.mode === 'damage') {
-                    // Sum damage for display
                     totalDisplay = (m.d.reduce((a, b) => a + b, 0)).toLocaleString();
                 }
 
@@ -1331,29 +2493,31 @@
                     <td class="drag-handle cursor-grab text-stone-300"><i class="fas fa-grip-vertical"></i></td>
                     <td style="text-align:left;">
                         <div class="member-info">
-                            <span class="member-name" onclick="openProfile(${idx})">${highlightText(m.name, term)}</span>
+                            <span class="tier-badge ${tier.class}">${tier.label}</span>
+                            <span class="member-name inline align-middle" onclick="openProfile(${idx})">${highlightText(m.name, term)}</span>
+                            <i class="fas fa-pen text-stone-300 hover:text-stone-600 cursor-pointer ml-1 text-[10px] opacity-30 hover:opacity-100 transition-opacity" onclick="event.stopPropagation(); renameMember(${idx})" title="Rename"></i>
                             <span class="text-xs text-yellow-500 ml-1 ${m.note ? 'inline' : 'hidden'}"><i class="fas fa-sticky-note"></i></span>
                         </div>
                     </td>
                     ${inputs}
-                    <td style="font-weight:bold; color:#57534E; font-size:${STATE.mode === 'damage' ? '0.9rem' : '1rem'}">${totalDisplay}</td>
+                    <td class="font-serif-num" style="font-weight:bold; color:#57534E; font-size:${STATE.mode === 'damage' ? '0.9rem' : '1.1rem'}">${totalDisplay}</td>
                     <td><i class="fas fa-trash text-stone-300 hover:text-red-400 cursor-pointer transition-colors" onclick="event.stopPropagation(); delMember(${idx})"></i></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
 
             // 3. Footer
-            let footer = `<tr><td colspan="2" style="text-align:right; font-weight:bold; padding-right:10px;">TOTAL</td>`;
+            let footer = `<tr><td colspan="2" style="text-align:right; font-weight:bold; padding-right:10px; font-family:'JetBrains Mono', monospace;">TOTAL</td>`;
             if (STATE.page === 1) {
                 if (STATE.mode === 'damage') {
-                    dmgSum.forEach(s => footer += `<td>${s.toLocaleString()}</td>`);
-                    footer += `<td>${dmgSum.reduce((a, b) => a + b, 0).toLocaleString()}</td><td></td>`;
+                    dmgSum.forEach(s => footer += `<td class="font-serif-num font-bold">${s.toLocaleString()}</td>`);
+                    footer += `<td class="font-serif-num font-bold text-lg">${dmgSum.reduce((a, b) => a + b, 0).toLocaleString()}</td><td></td>`;
                 } else {
-                    colSum.forEach(s => footer += `<td>${s}</td>`);
-                    footer += `<td>${colSum.reduce((a, b) => a + b, 0)}</td><td></td>`;
+                    colSum.forEach(s => footer += `<td class="font-serif-num font-bold">${s}</td>`);
+                    footer += `<td class="font-serif-num font-bold text-lg">${colSum.reduce((a, b) => a + b, 0)}</td><td></td>`;
                 }
             } else {
-                footer += `<td>${colSum[0]}</td><td></td><td></td>`;
+                footer += `<td class="font-serif-num font-bold">${colSum[0]}</td><td></td><td></td>`;
             }
             footer += `</tr>`;
             tfoot.innerHTML = footer;
@@ -1369,12 +2533,10 @@
             activeInputCtx = { el, mIdx, bIdx };
             const helper = document.getElementById('damage-helper');
 
-            // Position near the input
             const rect = el.getBoundingClientRect();
-            helper.style.top = (rect.top - 50) + 'px'; // Above the input
+            helper.style.top = (rect.top - 50) + 'px';
             helper.style.left = (rect.left - 20) + 'px';
 
-            // Adjust if too close to top edge
             if (rect.top < 60) {
                 helper.style.top = (rect.bottom + 10) + 'px';
             }
@@ -1384,7 +2546,6 @@
         }
 
         function closeDamageHelper() {
-            // Delay to allow button click to register
             helperTimeout = setTimeout(() => {
                 document.getElementById('damage-helper').classList.remove('active');
                 activeInputCtx = null;
@@ -1403,13 +2564,11 @@
 
         // --- Sorting ---
         function sortMembers(key, index = -1) {
-            // Logic to toggle order or set new key
             if (STATE.sort.key === key && STATE.sort.index === index) {
                 STATE.sort.order = STATE.sort.order === 'asc' ? 'desc' : 'asc';
             } else {
                 STATE.sort.key = key;
                 STATE.sort.index = index;
-                // Default order: Name -> ASC, Numbers -> DESC
                 STATE.sort.order = key === 'name' ? 'asc' : 'desc';
             }
 
@@ -1459,19 +2618,16 @@
         }
 
         // --- Member Actions ---
+        let saveTimeout = null;
+
         function updateVal(mIdx, vIdx, val) {
-            // Handle comma-separated strings from input
-            let cleanVal;
-            if (typeof val === 'string') {
-                cleanVal = parseInt(val.replace(/,/g, '')) || 0;
-            } else {
-                cleanVal = parseInt(val) || 0;
-            }
+            // Use validated input parsing
+            const maxVal = STATE.mode === 'damage' ? 999999999 : CONFIG.MAX_COUNT;
+            const cleanVal = parseNumericInput(val, 0, maxVal);
 
             if (STATE.page === 1) {
                 if (STATE.mode === 'damage') {
                     STATE.members[mIdx].d[vIdx] = cleanVal;
-                    // Auto-increment logic: if entering damage but count is 0, set count to 1
                     if (cleanVal > 0 && STATE.members[mIdx].v[vIdx] === 0) {
                         STATE.members[mIdx].v[vIdx] = 1;
                         showToast("Auto-tracked 1 attempt", "success");
@@ -1482,8 +2638,13 @@
             } else {
                 STATE.members[mIdx].v2 = cleanVal;
             }
-            saveState();
-            render();
+
+            // Debounced save for performance (don't full re-render on every keystroke)
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                saveState('update');
+                updateAnalytics(); // Only update charts, not full render
+            }, CONFIG.DEBOUNCE_MS);
         }
 
         function addMember() {
@@ -1514,15 +2675,13 @@
 
         function quickFill(bossIdx) {
             if (STATE.deadBosses[STATE.page][bossIdx]) return;
-            let promptText = STATE.mode === 'damage'
-                ? `Enter ${STATE.mode} for all members (numbers only, no commas needed):`
+            const promptText = STATE.mode === 'damage'
+                ? `Enter ${STATE.mode} for all members:`
                 : `Enter count for all members:`;
 
-            const val = prompt(promptText);
-            if (val !== null) {
-                // Strip commas if pasted
-                const num = parseInt(val.replace(/,/g, '')) || 0;
-
+            showInputModal(promptText, '', 'number', (val) => {
+                const maxVal = STATE.mode === 'damage' ? 999999999 : CONFIG.MAX_COUNT;
+                const num = parseNumericInput(val, 0, maxVal);
                 STATE.members.forEach(m => {
                     if (STATE.page === 1) {
                         if (STATE.mode === 'damage') m.d[bossIdx] = num;
@@ -1534,14 +2693,18 @@
                 saveState('fill');
                 render();
                 playTone('success');
-            }
+            });
         }
 
         // --- Features & Utils ---
         function highlightText(text, term) {
-            if (!term) return text;
-            const regex = new RegExp(`(${term})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
+            // XSS Prevention: Escape HTML first
+            const escaped = escapeHTML(text);
+            if (!term) return escaped;
+            // Escape term for regex safety
+            const escapedTerm = escapeHTML(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedTerm})`, 'gi');
+            return escaped.replace(regex, '<span class="highlight">$1</span>');
         }
 
         function switchPage(p) {
@@ -1564,28 +2727,6 @@
         function toggleCompact() { STATE.compact = !STATE.compact; document.body.classList.toggle('compact-mode'); }
         function toggleFilter(f) { STATE.filter = STATE.filter === f ? 'all' : f; document.getElementById('btn-filter-risk').classList.toggle('active'); render(); }
         function toggleMode() { STATE.mode = STATE.mode === 'count' ? 'damage' : 'count'; saveState(); render(); }
-        function resetWeek() {
-            if (!confirm("⚠️ WARNING: WEEKLY RESET\n\nThis will reset ALL attempts and damage to 0 for everyone.\nMember names will be kept.\n\nAre you sure?")) return;
-
-            // Manual Backup before reset
-            const now = new Date().toLocaleString();
-            const currentData = localStorage.getItem('bossGuildData');
-            localStorage.setItem('backup_pre_reset_' + Date.now(), JSON.stringify({ data: currentData, time: now }));
-
-            STATE.members.forEach(m => {
-                m.v = [0, 0, 0, 0];
-                m.d = [0, 0, 0, 0];
-                m.v2 = 0;
-            });
-
-            // Reset dead bosses status
-            STATE.deadBosses = { 1: [false, false, false, false], 2: [false] };
-
-            saveState('reset');
-            render();
-            showToast("Weekly Reset Complete. Backup saved.", "success");
-            playTone('delete');
-        }
 
         function toggleTheme() {
             const html = document.documentElement;
@@ -1604,17 +2745,22 @@
             setTimeout(() => t.classList.remove('show'), duration);
         }
 
-        function toggleSound() { 
-            STATE.soundEnabled = !STATE.soundEnabled; 
-            document.getElementById('btn-sound').innerHTML = STATE.soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>'; 
+        function toggleSound() {
+            STATE.soundEnabled = !STATE.soundEnabled;
+            document.getElementById('btn-sound').innerHTML = STATE.soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
         }
 
         // --- Settings / Bulk Import ---
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
             if (!modal.classList.contains('active')) {
-                // Populate current settings
                 document.getElementById('settingMaxHP').value = STATE.config.bossMaxHp;
+                document.getElementById('settingOCRKeywords').value = STATE.config.ocrKeywords;
+                document.getElementById('tierS').value = STATE.config.tiers.s;
+                document.getElementById('tierA').value = STATE.config.tiers.a;
+                document.getElementById('tierB').value = STATE.config.tiers.b;
+                document.getElementById('tierC').value = STATE.config.tiers.c;
+                document.getElementById('tierD').value = STATE.config.tiers.d;
                 modal.classList.add('active');
             } else {
                 modal.classList.remove('active');
@@ -1623,8 +2769,20 @@
 
         function saveSettings() {
             const newHp = parseInt(document.getElementById('settingMaxHP').value);
+            const newKeywords = document.getElementById('settingOCRKeywords').value;
+
+            const tiers = {
+                s: parseInt(document.getElementById('tierS').value) || 1500000,
+                a: parseInt(document.getElementById('tierA').value) || 1200000,
+                b: parseInt(document.getElementById('tierB').value) || 1000000,
+                c: parseInt(document.getElementById('tierC').value) || 800000,
+                d: parseInt(document.getElementById('tierD').value) || 500000
+            };
+
             if (!isNaN(newHp) && newHp > 0) {
                 STATE.config.bossMaxHp = newHp;
+                STATE.config.ocrKeywords = newKeywords;
+                STATE.config.tiers = tiers;
                 CONSTANTS.BOSS_MAX_HP = newHp;
                 saveState('config');
                 render();
@@ -1641,7 +2799,7 @@
             let count = 0;
             lines.forEach(name => {
                 if (!STATE.members.find(m => m.name === name)) {
-                    STATE.members.push({ name, v: [0,0,0,0], d: [0,0,0,0], v2: 0, note: "" });
+                    STATE.members.push({ name, v: [0, 0, 0, 0], d: [0, 0, 0, 0], v2: 0, note: "" });
                     count++;
                 }
             });
@@ -1681,17 +2839,17 @@
                 dragCounter = 0;
                 overlay.classList.add('hidden');
                 overlay.classList.remove('flex');
-                
+
                 if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                     const file = e.dataTransfer.files[0];
-                     if (file.type.startsWith('image/')) {
-                         processOCRFile(file);
-                     }
+                    const file = e.dataTransfer.files[0];
+                    if (file.type.startsWith('image/')) {
+                        handleOCRFile({ files: [file] });
+                    }
                 }
             });
         }
 
-        // --- OCR Logic ---
+        // --- OCR Logic: Sliding Window ---
         function triggerOCR() {
             document.getElementById('ocrInput').click();
         }
@@ -1703,7 +2861,6 @@
             input.value = '';
         }
 
-        // Preprocess image to grayscale & increase contrast for better OCR
         function preprocessImage(file) {
             return new Promise(resolve => {
                 const img = new Image();
@@ -1712,27 +2869,19 @@
                     const cvs = document.createElement('canvas');
                     const ctx = cvs.getContext('2d');
 
-                    // 1. Aggressive Upscaling: Tesseract loves larger text
                     let width = img.width;
                     let height = img.height;
-                    
-                    // Scale so the smallest dimension is at least 2000px
                     const minDim = 2000;
                     const scale = Math.max(minDim / width, minDim / height, 1);
-                    
                     width = Math.round(width * scale);
                     height = Math.round(height * scale);
 
-                    // 2. Padding: Add white border to prevent edge clipping
                     const padding = 40;
                     cvs.width = width + (padding * 2);
                     cvs.height = height + (padding * 2);
 
-                    // Fill with white background first
                     ctx.fillStyle = "#FFFFFF";
                     ctx.fillRect(0, 0, cvs.width, cvs.height);
-                    
-                    // Draw Image with High Quality Smoothing
                     ctx.imageSmoothingEnabled = true;
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, padding, padding, width, height);
@@ -1741,69 +2890,39 @@
                     const d = idata.data;
                     const len = d.length;
 
-                    // 3. Grayscale & Stats Calculation
+                    // Otsu binarization
                     let totalLuminance = 0;
                     const grayArr = new Uint8Array(len / 4);
-
                     for (let i = 0; i < len; i += 4) {
                         const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
                         grayArr[i / 4] = g;
                         totalLuminance += g;
                     }
-                    
                     const avgLum = totalLuminance / (len / 4);
                     const isDarkTheme = avgLum < 128;
 
-                    // 4. Calculate Otsu Threshold (from grayscale data)
                     const histogram = new Array(256).fill(0);
                     for (let i = 0; i < grayArr.length; i++) histogram[grayArr[i]]++;
 
-                    let sum = 0;
+                    let sum = 0, sumB = 0, wB = 0, wF = 0, maxVar = 0, threshold = 0;
                     for (let i = 0; i < 256; i++) sum += i * histogram[i];
-
-                    let sumB = 0;
-                    let wB = 0;
-                    let wF = 0;
-                    let maxVar = 0;
-                    let threshold = 0;
-                    const totalPixels = grayArr.length;
 
                     for (let t = 0; t < 256; t++) {
                         wB += histogram[t];
                         if (wB === 0) continue;
-                        wF = totalPixels - wB;
+                        wF = (len / 4) - wB;
                         if (wF === 0) break;
                         sumB += t * histogram[t];
                         const mB = sumB / wB;
                         const mF = (sum - sumB) / wF;
                         const varBetween = wB * wF * (mB - mF) * (mB - mF);
-                        if (varBetween > maxVar) {
-                            maxVar = varBetween;
-                            threshold = t;
-                        }
+                        if (varBetween > maxVar) { maxVar = varBetween; threshold = t; }
                     }
 
-                    // 5. Enhanced Binarization with Contrast Boost
-                    // Logic: We want FINAL output to be Black Text (0) on White BG (255)
                     for (let i = 0; i < len; i += 4) {
-                        // Apply slight contrast stretch to the grayscale value
                         let g = grayArr[i / 4];
-                        
-                        // Apply threshold logic
-                        let val;
-                        if (isDarkTheme) {
-                            // Dark Mode Source: Text is Light (High G), BG is Dark (Low G)
-                            // We want Text -> Black (0), BG -> White (255)
-                            val = g > threshold ? 0 : 255;
-                        } else {
-                            // Light Mode Source: Text is Dark (Low G), BG is Light (High G)
-                            // We want Text -> Black (0), BG -> White (255)
-                            val = g < threshold ? 0 : 255;
-                        }
-
-                        d[i] = val;
-                        d[i + 1] = val;
-                        d[i + 2] = val;
+                        let val = isDarkTheme ? (g > threshold ? 0 : 255) : (g < threshold ? 0 : 255);
+                        d[i] = d[i + 1] = d[i + 2] = val;
                     }
 
                     ctx.putImageData(idata, 0, 0);
@@ -1815,8 +2934,6 @@
         let pendingOCRFile = null;
 
         function processOCRFile(file) {
-            // Determine target boss
-            // Always open modal
             pendingOCRFile = file;
             document.getElementById('ocrBossModal').classList.add('active');
         }
@@ -1824,7 +2941,6 @@
         function selectOCRBoss(idx) {
             document.getElementById('ocrBossModal').classList.remove('active');
             if (pendingOCRFile && idx >= 0) {
-                // If idx is 4, it is God of Destruction
                 if (idx === 4) {
                     runOCR(pendingOCRFile, 0, true);
                 } else {
@@ -1834,94 +2950,152 @@
             }
         }
 
+        // Lazy load Tesseract.js (Performance Optimization - saves ~2MB on initial load)
+        async function loadTesseract() {
+            if (typeof Tesseract === 'undefined') {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Failed to load OCR engine'));
+                    document.head.appendChild(script);
+                });
+            }
+        }
+
         async function runOCR(file, bossIdx, isDestroyer) {
-            // UI References
             const modal = document.getElementById('ocrProgressModal');
             const statusText = document.getElementById('ocrStatusText');
             const progressBar = document.getElementById('ocrProgressBar');
             const progressPercent = document.getElementById('ocrProgressPercent');
 
-            // Reset UI
             progressBar.style.width = '0%';
             progressPercent.innerText = '0%';
-            statusText.innerText = "📷 Enhancing Image...";
+            statusText.innerText = "ðŸ“· Enhancing Image...";
             modal.classList.add('active');
 
             try {
+                // 0. Lazy load Tesseract if needed
+                await loadTesseract();
+
                 // 1. Preprocess
+                statusText.innerText = "Enhancing Image...";
                 progressBar.style.width = '10%';
                 progressPercent.innerText = '10%';
-                
-                await new Promise(r => setTimeout(r, 100)); // Small UX delay
+                await new Promise(r => setTimeout(r, 100));
 
                 const processedBlob = await preprocessImage(file);
-                
+
                 progressBar.style.width = '20%';
                 progressPercent.innerText = '20%';
 
-                // 2. Recognize with Progress
-                // Tesseract.recognize call with 'eng+tha' and improved logger
+                // 2. Recognize
                 const { data: { text } } = await Tesseract.recognize(processedBlob, 'eng+tha', {
                     logger: m => {
                         if (m.status === 'recognizing text') {
-                            // Map 0-1 to 20%-90%
-                            const p = 20 + (m.progress * 70); 
+                            const p = 20 + (m.progress * 70);
                             progressBar.style.width = `${p}%`;
                             progressPercent.innerText = `${Math.round(p)}%`;
-                            statusText.innerText = "🧠 Recognizing Thai...";
-                        } else if (m.status === 'loading tesseract core') {
-                             statusText.innerText = "⬇️ Loading Core...";
-                        } else if (m.status === 'loading language traineddata') {
-                             statusText.innerText = "⬇️ Loading Thai Data..."; 
-                        } else if (m.status === 'initializing api') {
-                             statusText.innerText = "⚙️ Initializing...";
+                            statusText.innerText = "ðŸ§  Recognizing Text...";
                         }
                     }
                 });
 
-                // 3. Parse Logic
-                statusText.innerText = "✅ Matching Data...";
+                // 3. Sliding Window Strategy
+                statusText.innerText = "Analyzing Data...";
                 progressBar.style.width = '95%';
                 progressPercent.innerText = '95%';
-                
-                await new Promise(r => setTimeout(r, 300)); // Short UX pause to show 95%
+                await new Promise(r => setTimeout(r, 300));
 
                 let count = 0;
-                let updates = []; // Track updates for summary toast
+                let updates = [];
                 const lines = text.split('\n');
+                const keywords = STATE.config.ocrKeywords.split(',').map(k => k.trim().toLowerCase());
 
-                // Using standard for loop to access subsequent lines for context
+                // DEBUG: Log OCR output to console
+                console.log('=== OCR DEBUG ===');
+                console.log('Raw OCR Text:', text);
+                console.log('Lines:', lines);
+
+                // Iterate through lines looking for names
                 for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i];
-                    // Enhanced Matching: Normalize by stripping ALL whitespaces
-                    const lineNormalized = line.replace(/\s+/g, '').toLowerCase();
+                    // Create normalized strings for fuzzy check
+                    const lineNormalized = lines[i].replace(/\s+/g, '').toLowerCase();
 
+                    // Check if any member matches this line
                     STATE.members.forEach((m, mIdx) => {
                         const nameNormalized = m.name.replace(/\s+/g, '').toLowerCase();
 
                         if (lineNormalized.includes(nameNormalized)) {
-                            // Context: Current line + Next line
-                            const currentLine = lines[i];
-                            const nextLine = (i + 1 < lines.length) ? lines[i + 1] : "";
-                            const contextText = currentLine + " " + nextLine;
+                            // Match Found! Create Context Window (Current + Next 2 lines)
+                            let contextLines = [lines[i]];
+                            if (i + 1 < lines.length) contextLines.push(lines[i + 1]);
+                            if (i + 2 < lines.length) contextLines.push(lines[i + 2]);
 
-                            // 1. Get Score (Max > 1000 from both lines)
-                            const allNumMatches = contextText.match(/[\d,.]+/g) || [];
-                            const candidates = allNumMatches.map(n => parseInt(n.replace(/[,.]/g, ''))).filter(n => !isNaN(n));
-                            const maxScore = candidates.length > 0 ? Math.max(...candidates.filter(n => n > 1000)) : 0;
+                            const fullContext = contextLines.join(' ');
+                            const lowerContext = fullContext.toLowerCase();
 
-                            // 2. Get Count (Small number on next line)
-                            let countVal = null;
-                            const nextLineNumMatches = nextLine.match(/[\d,.]+/g) || [];
-                            // Filter strictly: integers between 1 and 50.
-                            const smallNums = nextLineNumMatches
-                                .map(n => parseInt(n.replace(/[,.]/g, '')))
-                                .filter(n => !isNaN(n) && n > 0 && n <= 50);
+                            // Logic 1: Find Score (Max number > 1000)
+                            const allNumbers = fullContext.match(/[\d,.]+/g) || [];
+                            const candidates = allNumbers.map(n => parseInt(n.replace(/[,.]/g, ''))).filter(n => !isNaN(n) && n > 0);
+                            // BUG-003 Fix: Safe Math.max handling for empty arrays
+                            const validScores = candidates.filter(n => n > CONFIG.MIN_SCORE_THRESHOLD);
+                            const maxScore = validScores.length > 0 ? Math.max(...validScores) : 0;
 
-                            if (smallNums.length > 0) {
-                                countVal = smallNums[0];
+                            // Logic 2: Find Count - IMPROVED for Thai text patterns
+                            // Pattern: "ท้าทาย X ครั้ง" where X is between keywords
+                            let foundCount = null;
+
+                            // Method 1: Direct pattern for "ท้าทาย N ครั้ง" (most reliable)
+                            const thaiPattern = /ท้าทาย\s*(\d{1,2})\s*ครั้ง/i;
+                            const thaiMatch = fullContext.match(thaiPattern);
+                            if (thaiMatch) {
+                                const val = parseInt(thaiMatch[1]);
+                                if (!isNaN(val) && val > 0 && val <= 50) {
+                                    foundCount = val;
+                                }
                             }
 
+                            // Method 2: Fallback - look for "X ครั้ง" or "ครั้ง X" patterns
+                            if (foundCount === null) {
+                                const countPatterns = [
+                                    /(\d{1,2})\s*ครั้ง/i,       // "6 ครั้ง"
+                                    /ครั้ง\s*(\d{1,2})/i,       // "ครั้ง 6"
+                                    /(\d{1,2})\s*times/i,       // "6 times"
+                                    /times\s*(\d{1,2})/i,       // "times 6"
+                                    /attack\s*(\d{1,2})/i,      // "attack 6"
+                                    /(\d{1,2})\s*attack/i       // "6 attack"
+                                ];
+
+                                for (let pattern of countPatterns) {
+                                    const match = fullContext.match(pattern);
+                                    if (match && match[1]) {
+                                        const val = parseInt(match[1]);
+                                        if (!isNaN(val) && val > 0 && val <= 50) {
+                                            foundCount = val;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Method 3: Last resort - use keyword-based search
+                            if (foundCount === null) {
+                                for (let k of keywords) {
+                                    const escK = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                    const regex = new RegExp(`(\\d{1,2})\\s*${escK}|${escK}\\s*(\\d{1,2})`, 'i');
+                                    const match = lowerContext.match(regex);
+                                    if (match) {
+                                        const val = parseInt(match[1] || match[2]);
+                                        if (!isNaN(val) && val > 0 && val <= 50) {
+                                            foundCount = val;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Update Logic
                             if (maxScore > 0) {
                                 let oldScore = isDestroyer ? STATE.members[mIdx].v2 : STATE.members[mIdx].d[bossIdx];
                                 let oldCount = isDestroyer ? 0 : STATE.members[mIdx].v[bossIdx];
@@ -1935,16 +3109,13 @@
                                     scoreChanged = true;
                                 }
 
-                                // Update Count (INDEPENDENT CHECK)
+                                // Update Count (Normal Bosses Only)
                                 if (!isDestroyer) {
-                                    if (countVal !== null) {
-                                        // If we found a count in image, FORCE update if different
-                                        if (countVal !== oldCount) {
-                                            STATE.members[mIdx].v[bossIdx] = countVal;
-                                            countChanged = true;
-                                        }
-                                    } else if (STATE.members[mIdx].v[bossIdx] === 0) {
-                                        // Fallback: Smart Increment if no count found and starting from 0
+                                    if (foundCount !== null && foundCount !== oldCount) {
+                                        STATE.members[mIdx].v[bossIdx] = foundCount;
+                                        countChanged = true;
+                                    } else if (foundCount === null && STATE.members[mIdx].v[bossIdx] === 0) {
+                                        // Fallback: Score exists, but no count keyword found -> Default to 1
                                         STATE.members[mIdx].v[bossIdx] = 1;
                                         countChanged = true;
                                     }
@@ -1952,13 +3123,9 @@
 
                                 if (scoreChanged || countChanged) {
                                     let details = [];
-                                    if(scoreChanged) details.push(`Dmg: ${oldScore.toLocaleString()} -> ${maxScore.toLocaleString()}`);
-                                    if(countChanged) details.push(`Cnt: ${oldCount} -> ${STATE.members[mIdx].v[bossIdx]}`);
-
-                                    updates.push({
-                                        name: m.name,
-                                        details: details.join(', ')
-                                    });
+                                    if (scoreChanged) details.push(`Dmg: ${((maxScore / 1000000).toFixed(1))}M`);
+                                    if (countChanged) details.push(`Cnt: ${STATE.members[mIdx].v[bossIdx]}`);
+                                    updates.push(`${m.name} (${details.join(', ')})`);
                                     count++;
                                 }
                             }
@@ -1969,19 +3136,11 @@
                 modal.classList.remove('active');
                 saveState('ocr');
                 render();
-                
-                // Detailed Summary Toast
+
                 if (updates.length > 0) {
-                    let msg = `OCR Complete (${updates.length} updated)`;
-                    updates.slice(0, 5).forEach(u => {
-                        msg += `\n• ${u.name}: ${u.details}`;
-                    });
-                    if (updates.length > 5) {
-                        msg += `\n...and ${updates.length - 5} more`;
-                    }
-                    showToast(msg, "success", 6000);
+                    showToast(`Updated ${updates.length} records\n${updates.slice(0, 3).join('\n')}${updates.length > 3 ? '...' : ''}`, "success", 5000);
                 } else {
-                    showToast("OCR Complete: No new data found.", "info");
+                    showToast("OCR Complete: No new matching data found.", "info");
                 }
 
             } catch (e) {
@@ -2047,6 +3206,7 @@
             document.getElementById('exportModal').classList.add('active');
             document.getElementById('qrcode').innerHTML = '';
             new QRCode(document.getElementById("qrcode"), { text: window.location.href, width: 100, height: 100 });
+            renderHistoryList();
         }
         function toggleShortcuts() { document.getElementById('shortcutsModal').classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
@@ -2127,86 +3287,64 @@
         }
 
         function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(20);
-            doc.text("BossGuild Report", 10, 20);
-            doc.setFontSize(12);
-            let y = 30;
-            STATE.members.forEach(m => {
-                const stats = getMemberStats(m);
-                doc.text(`${m.name}: ${stats.total} (Note: ${m.note})`, 10, y);
-                y += 10;
-                if(y > 280) { doc.addPage(); y = 10; }
-            });
-            doc.save("report.pdf");
-            showToast("PDF Downloaded", "success");
-        }
-        
-        // Export CSV Function
-        function exportCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            
-            if(STATE.page === 1) {
-                csvContent += "Name,Boss1,Boss2,Boss3,Boss4,Total\n";
-                STATE.members.forEach(function(m) {
-                    let row = `${m.name},${m.v[0]},${m.v[1]},${m.v[2]},${m.v[3]},${m.v.reduce((a,b)=>a+b,0)}`;
-                    csvContent += row + "\n";
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(20);
+                doc.text("BossGuild Report", 10, 20);
+                doc.setFontSize(12);
+                let y = 30;
+                STATE.members.forEach(m => {
+                    const stats = getMemberStats(m);
+                    // Use escapeHTML for safety (PDF text is safe but good practice)
+                    doc.text(`${m.name}: ${stats.total} (Note: ${m.note || ''})`, 10, y);
+                    y += 10;
+                    if (y > 280) { doc.addPage(); y = 10; }
                 });
-            } else {
-                csvContent += "Name,God of Destruction\n";
-                STATE.members.forEach(function(m) {
-                    csvContent += `${m.name},${m.v2}\n`;
-                });
+                doc.save("report.pdf");
+                showToast("PDF Downloaded", "success");
+            } catch (error) {
+                console.error('PDF Export failed:', error);
+                showToast("PDF Export Failed: " + error.message, "danger");
             }
-
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "bossguild_data.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showToast("CSV Downloaded", "success");
         }
 
         async function exportImage(type) {
             closeModal('exportModal');
             showToast('Generating...', 'info');
-            await new Promise(r => setTimeout(r, 500)); // Wait for modal animation
+            await new Promise(r => setTimeout(r, 500));
 
             let element;
             let options = {
                 scale: 2,
                 useCORS: true,
                 logging: false,
-                backgroundColor: null 
+                backgroundColor: null
             };
 
             if (type === 'story') {
-                // Logic for IG Story export
                 const storyEl = document.getElementById('story-export');
                 storyEl.style.top = '0';
                 storyEl.style.left = '0';
-                
-                // Populate story data
+
                 const days = STATE.page === 1 ? STATE.days1 : STATE.days2;
                 let grandTotal = 0;
                 let max = -1;
                 let mvp = '-';
-                
+
                 STATE.members.forEach(m => {
-                   const s = getMemberStats(m);
-                   grandTotal += s.total;
-                   if(s.total > max) { max = s.total; mvp = m.name; }
+                    const s = getMemberStats(m);
+                    grandTotal += s.total;
+                    if (s.total > max) { max = s.total; mvp = m.name; }
                 });
-                
+
                 document.getElementById('story-wood').innerText = grandTotal;
-                document.getElementById('story-mvp').innerText = mvp;
-                
-                // Draw Chart
+                document.getElementById('story-mvp').innerText = escapeHTML(mvp);
+
                 const ctx = document.getElementById('storyChart').getContext('2d');
-                new Chart(ctx, {
+                // Memory Leak Fix: Destroy previous chart instance
+                if (STATE.storyChart) STATE.storyChart.destroy();
+                STATE.storyChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
                         labels: ['Done', 'Left'],
@@ -2214,19 +3352,18 @@
                     },
                     options: { cutout: '80%', plugins: { legend: { display: false } }, animation: false }
                 });
-                
+
                 element = storyEl;
             } else {
-                element = document.querySelector('#main-container'); // Capture main container
+                element = document.querySelector('#main-container');
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 options.backgroundColor = isDark ? '#1C1917' : '#FDFCF8';
             }
 
             html2canvas(element, options).then(canvas => {
                 download(canvas, `BossGuild_${type}.png`);
-                
-                // Cleanup Story
-                if(type === 'story') {
+
+                if (type === 'story') {
                     const storyEl = document.getElementById('story-export');
                     storyEl.style.top = '-9999px';
                     storyEl.style.left = '-9999px';
@@ -2258,6 +3395,58 @@
             navigator.clipboard.writeText(text).then(() => showToast("Copied to Clipboard", "success"));
         }
 
+        // Helper function for formatting damage
+        function formatDmgShort(val) {
+            if (val >= 1000000) return (val / 1000000).toFixed(1) + 'M';
+            if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+            return val.toString();
+        }
+
+        // Rename member function
+        function renameMember(idx) {
+            const m = STATE.members[idx];
+            showInputModal('Rename Member', m.name, 'text', (newName) => {
+                if (newName && newName.trim() && newName.trim() !== m.name) {
+                    m.name = newName.trim();
+                    saveState('rename');
+                    render();
+                    showToast(`Renamed to ${newName.trim()}`, "success");
+                    playTone('success');
+                }
+            });
+        }
+
+        function copySmartReport() {
+            const days = STATE.page === 1 ? STATE.days1 : STATE.days2;
+
+            // Sort by tier avg (create copy to avoid mutating original)
+            const sorted = [...STATE.members].sort((a, b) => {
+                const tA = calculateTier(a).avg;
+                const tB = calculateTier(b).avg;
+                return tB - tA;
+            });
+
+            // Format with code blocks for Discord/Line alignment
+            let text = `🏆 GUILD REPORT (Day ${days})\n`;
+            text += '```\n';
+            text += '===================================\n';
+            text += 'Rank  Name           Avg     Total\n';
+            text += '===================================\n';
+
+            sorted.forEach(m => {
+                const t = calculateTier(m);
+                const avgStr = formatDmgShort(t.avg).padEnd(8);
+                const totalStr = formatDmgShort(t.totalDmg).padEnd(8);
+                const nameStr = m.name.substring(0, 14).padEnd(14);
+                text += `[${t.label}]   ${nameStr} ${avgStr} ${totalStr}\n`;
+            });
+
+            text += '===================================\n';
+            text += '```';
+
+            navigator.clipboard.writeText(text).then(() => showToast("Smart Report Copied!", "success"));
+        }
+
         // --- Chart Init ---
         function initCharts() {
             const ctx = document.getElementById('woodChart').getContext('2d');
@@ -2285,15 +3474,15 @@
         function setupShortcuts() {
             document.addEventListener('keydown', (e) => {
                 if (e.key === '?' && !e.ctrlKey) toggleShortcuts();
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleCommandPalette(true); }
                 if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
                 if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveState(); showToast("Saved!", "success"); }
-                if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-                    // Handled by paste event
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+                    toggleCommandPalette(false);
                 }
-                if (e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
             });
 
-            // Add paste listener for images
             document.addEventListener('paste', (e) => {
                 const items = (e.clipboardData || e.originalEvent.clipboardData).items;
                 for (let index in items) {
@@ -2301,13 +3490,110 @@
                     if (item.kind === 'file' && item.type.includes('image/')) {
                         const blob = item.getAsFile();
                         processOCRFile(blob);
-                        e.preventDefault(); 
+                        e.preventDefault();
                         break;
                     }
                 }
             });
         }
     </script>
+    <!-- Leaderboard Modal -->
+    <div class="modal-overlay" id="leaderboardModal">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-100 dark:border-stone-700">
+                <h3 class="font-serif text-2xl text-stone-800 dark:text-stone-100"><i
+                        class="fas fa-trophy text-amber-500 mr-2"></i>Leaderboard</h3>
+                <button class="text-stone-400 hover:text-stone-600" onclick="closeModal('leaderboardModal')"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+            <div id="leaderboard-list" class="max-h-96 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Universal Input Modal -->
+    <div class="modal-overlay" id="inputModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-100 dark:border-stone-700">
+                <h3 id="inputModalTitle" class="font-sans text-xl font-semibold text-stone-800 dark:text-stone-100"><i
+                        class="fas fa-edit text-indigo-500 mr-2"></i>Input</h3>
+                <button class="text-stone-400 hover:text-stone-600 transition-colors" onclick="closeInputModal()"><i
+                        class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="mb-6">
+                <input type="text" id="modalInput"
+                    class="input-minimal w-full text-center py-3 text-lg border border-stone-200 dark:border-stone-600 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                    placeholder="Enter value...">
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeInputModal()"
+                    class="flex-1 py-3 px-4 rounded-xl bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-semibold hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors">Cancel</button>
+                <button onclick="confirmInputModal()"
+                    class="flex-1 py-3 px-4 rounded-xl bg-indigo-500 text-white font-semibold hover:bg-indigo-600 transition-colors shadow-md">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-save Indicator -->
+    <div id="autosave-indicator"
+        style="position:fixed;bottom:80px;right:30px;z-index:1900;opacity:0;transition:opacity 0.3s;"
+        class="flex items-center gap-2 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full px-3 py-2 shadow-lg">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+        <span id="autosave-text" class="text-xs text-stone-500 dark:text-stone-400">Saved</span>
+    </div>
+
+    <script>
+        // --- Universal Input Modal Logic ---
+        let inputModalCallback = null;
+
+        function showInputModal(title, currentValue, inputType, callback) {
+            inputModalCallback = callback;
+            document.getElementById('inputModalTitle').innerHTML = `<i class="fas fa-edit text-indigo-500 mr-2"></i>${title}`;
+            const input = document.getElementById('modalInput');
+            input.type = inputType || 'text';
+            input.value = currentValue || '';
+
+            // Set font based on type
+            if (inputType === 'number') {
+                input.style.fontFamily = "'JetBrains Mono', monospace";
+            } else {
+                input.style.fontFamily = "'Prompt', sans-serif";
+            }
+
+            document.getElementById('inputModal').classList.add('active');
+            setTimeout(() => input.focus(), 100);
+            input.select();
+        }
+
+        function closeInputModal() {
+            document.getElementById('inputModal').classList.remove('active');
+            inputModalCallback = null;
+        }
+
+        function confirmInputModal() {
+            const value = document.getElementById('modalInput').value;
+            if (inputModalCallback) {
+                inputModalCallback(value);
+            }
+            closeInputModal();
+        }
+
+        // Enter key support for modal
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalInput = document.getElementById('modalInput');
+            if (modalInput) {
+                modalInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        confirmInputModal();
+                    }
+                    if (e.key === 'Escape') {
+                        closeInputModal();
+                    }
+                });
+            }
+        });
+    </script>
 </body>
+
 
 </html>
