@@ -137,6 +137,53 @@
             --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
         }
 
+        /* ====================================
+           PERFORMANCE OPTIMIZATIONS
+           ==================================== */
+
+        /* GPU Acceleration for animated elements */
+        .tool-btn,
+        .metric-card,
+        .modal,
+        .toast,
+        tbody tr,
+        .tier-badge,
+        .export-option,
+        .ocr-option {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        /* Reduce paint on scroll */
+        .table-wrapper {
+            contain: layout style;
+        }
+
+        /* Optimize will-change for frequently animated */
+        .modal-overlay .modal {
+            will-change: transform, opacity;
+        }
+
+        .toast {
+            will-change: transform;
+        }
+
+        tbody tr {
+            will-change: transform, box-shadow;
+        }
+
+        /* Reduce motion for users who prefer it */
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
         /* Global Body - Warm Eggshell Paper */
         body {
             background-color: var(--kanso-bg);
@@ -1839,6 +1886,30 @@
                 };
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Throttle utility for scroll/resize events (performance)
+        function throttle(func, limit) {
+            let inThrottle;
+            return function (...args) {
+                if (!inThrottle) {
+                    func.apply(this, args);
+                    inThrottle = true;
+                    setTimeout(() => inThrottle = false, limit);
+                }
+            };
+        }
+
+        // RequestAnimationFrame wrapper for smooth updates
+        function rafThrottle(func) {
+            let rafId = null;
+            return function (...args) {
+                if (rafId) return;
+                rafId = requestAnimationFrame(() => {
+                    func.apply(this, args);
+                    rafId = null;
+                });
             };
         }
 
